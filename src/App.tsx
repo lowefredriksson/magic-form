@@ -1,24 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, {
+  useRef,
+  useContext,
+  useState,
+  useCallback,
+  ChangeEvent,
+} from "react";
+import "./App.css";
+import { MagicForm, Field, FieldController, useField } from "./MagicForm";
 
 function App() {
+  const [field1Error, field1Props] = useField("firstname", {
+    validate: (value: string) => value.length > 5,
+  });
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+      <MagicForm>
+        <input type="fname" {...field1Props} />
+        {field1Error ? <div>ER</div> : null}
+        <Field
+          label="Username"
+          name="Username"
+          type="email"
+          validate={(name: string) => name.length > 4}
+        />
+        <FieldController
+          name="Password"
+          validate={(password: string) => password.length > 8}
         >
-          Learn React
-        </a>
-      </header>
+          {([error, props]) => <input type="password" {...props} />}
+        </FieldController>
+      </MagicForm>
     </div>
   );
 }
