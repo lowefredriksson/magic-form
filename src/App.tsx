@@ -22,6 +22,7 @@ function App() {
           name="Username"
           type="email"
           validate={(name: string) => name.length > 4}
+          required
         />
         <FieldController
           name="Password"

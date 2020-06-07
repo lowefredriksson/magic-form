@@ -64,7 +64,7 @@ const useError = (
         setError(!valid);
       }
     }
-  }, [fields, validate, error]);
+  }, [fields, validate, error, name]);
 
   const onChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -83,20 +83,27 @@ const useError = (
 
 export const useField = (
   name: string,
-  options: { validate?: (value: string) => boolean } = {}
+  options: { validate?: (value: string) => boolean, required?: boolean } = {}
 ) => {
   const { register } = useContext(MagicFormContext);
   const [error, fieldProps] = useError(name, {
     validate: options.validate,
   });
+  let props: { [Key: string]: any } = {
+    ...fieldProps,
+    ref: register,
+    name,
+  };
+  props['area-invalid'] = error ? "true" : "false";
+  props['area-describyBy'] = `${name}_error`;
+  if (options.required) {
+    props['required'] = true; 
+    props['aria-required'] = true;
+   }
   registerRender(name);
   return [
     error,
-    {
-      ...fieldProps,
-      ref: register,
-      name,
-    },
+    props
   ];
 };
 
@@ -114,16 +121,12 @@ export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
     <>
       <label htmlFor={name}>{label}</label>
       <input
-        required
-        aria-required
-        aria-invalid={error ? "true" : "false"}
-        aria-describedBy={`${name}_error`}
         id={name}
         {...inputProps}
         {...fieldProps}
       />
       {error ? (
-        <div id={`${name}_error`} aria-role="alert">
+        <div id={`${name}_error`}>
           ERROR
         </div>
       ) : null}
