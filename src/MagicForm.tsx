@@ -6,16 +6,7 @@ import React, {
   ChangeEvent,
 } from "react";
 import "./App.css";
-
-const renders: { [Key: string]: number } = {};
-
-const registerRender = (name: string) => {
-  if (renders[name] === undefined) {
-    renders[name] = 0;
-  }
-  renders[name] = renders[name] + 1;
-  console.log("renders", renders);
-};
+import { registerRender } from "./renders";
 
 type ContextType = {
   fields: { [Key: string]: HTMLInputElement };
@@ -33,7 +24,6 @@ const useMagicForm = () => {
   const register = (ref: HTMLInputElement | null) => {
     if (ref && ref.name) {
       fields.current[ref.name] = ref;
-      console.log("ref", ref);
     }
   };
 
@@ -45,23 +35,46 @@ type FieldSpreadProps = {
   onBlur: () => void;
 };
 
+type Error = {
+  message?: string;
+  value: boolean;
+}
+
+const errorEquals = (oldError: Error | null, newError: Error | null) => {
+  if (oldError === null && newError === null) {
+    return true;
+  }
+  if (oldError === null && newError !== null) {
+    return false;
+  }
+  if (oldError !== null && newError === null) {
+    return false;
+  }
+  if (oldError!.value !== newError!.value) {
+    return false;
+  } 
+  if (oldError!.message !== newError!.message) {
+    return false;
+  }
+}
+
 const useError = (
   name: string,
   options: {
-    validate?: (value: string) => boolean;
+    validate?: (value: string) => Error;
   } = {}
-): [boolean | null, FieldSpreadProps] => {
+): [Error | null, FieldSpreadProps] => {
   const { fields } = useContext(MagicFormContext);
   const { validate } = options;
 
-  const [error, setError] = useState<boolean | null>(null);
+  const [error, setError] = useState<Error | null>(null);
 
   const onBlur = useCallback(() => {
     const field = fields[name];
     if (validate && field) {
       const valid = validate(field.value);
-      if (!valid !== error) {
-        setError(!valid);
+      if (!errorEquals(error, valid)) {
+        setError(valid);
       }
     }
   }, [fields, validate, error, name]);
@@ -70,8 +83,8 @@ const useError = (
     (event: ChangeEvent<HTMLInputElement>) => {
       if (error !== null && validate) {
         const valid = validate(event.target.value);
-        if (!valid !== error) {
-          setError(!valid);
+        if (!errorEquals(error, valid)) {
+          setError(valid);
         }
       }
     },
@@ -83,7 +96,7 @@ const useError = (
 
 export const useField = (
   name: string,
-  options: { validate?: (value: string) => boolean, required?: boolean } = {}
+  options: { validate?: (value: string) => Error, required?: boolean } = {}
 ) => {
   const { register } = useContext(MagicFormContext);
   const [error, fieldProps] = useError(name, {
@@ -109,7 +122,7 @@ export const useField = (
 
 type FieldProps = {
   name: string;
-  validate?: (value: string) => boolean;
+  validate?: (value: string) => Error;
   label: string;
 } & React.HTMLProps<HTMLInputElement>;
 
@@ -127,7 +140,7 @@ export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
       />
       {error ? (
         <div id={`${name}_error`}>
-          ERROR
+          {error.message}
         </div>
       ) : null}
     </>
@@ -136,7 +149,7 @@ export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
 
 type FieldControllerProps = {
   name: string;
-  validate?: (value: string) => boolean;
+  validate?: (value: string) => Error;
   children: (props: ReturnType<typeof useField>) => React.ReactElement;
 };
 
@@ -154,7 +167,6 @@ export const FieldController = ({
 type MagicFormProps = {} & React.HTMLProps<HTMLFormElement>;
 
 export const MagicForm: React.FC = (props: MagicFormProps) => {
-  console.log("props");
   const magicForm = useMagicForm();
   registerRender("MagicForm");
   return (
