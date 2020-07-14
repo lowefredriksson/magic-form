@@ -1,6 +1,7 @@
 import React from "react";
 import "./App.css";
-import { Field, FieldController, MagicForm } from "./MagicForm";
+import { MagicForm } from "./MagicForm";
+import { Field } from "./Field";
 import { useField } from "./useField";
 
 function App() {
@@ -26,16 +27,6 @@ function App() {
           }
           required
         />
-        <FieldController
-          name="Password"
-          validate={(password: string) =>
-            password.length > 8
-              ? { value: false }
-              : { value: true, message: "Needs to be 8" }
-          }
-        >
-          {([error, props]) => <input type="password" {...props} />}
-        </FieldController>
       </MagicForm>
     </div>
   );

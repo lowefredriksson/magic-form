@@ -31,14 +31,3 @@ export const useField = (
   registerRender(name);
   return [error, props];
 };
-type MagicFormProps = {} & React.HTMLProps<HTMLFormElement>;
-
-export const MagicForm: React.FC = (props: MagicFormProps) => {
-  const magicForm = useMagicForm();
-  registerRender("MagicForm");
-  return (
-    <MagicFormContext.Provider value={magicForm}>
-      <form>{props.children}</form>
-    </MagicFormContext.Provider>
-  );
-};

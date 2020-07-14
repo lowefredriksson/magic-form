@@ -1,7 +1,5 @@
 import React, { useRef } from "react";
 import "./App.css";
-import { useField } from "./useField";
-import { Error } from "./Error";
 import { registerRender } from "./renders";
 
 // Core
@@ -43,42 +41,4 @@ export const MagicForm: React.FC = (props: MagicFormProps) => {
 export type FieldSpreadProps = {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: () => void;
-};
-
-//-------------------------------------------
-
-type FieldProps = {
-  name: string;
-  validate?: (value: string) => Error;
-  label: string;
-} & React.HTMLProps<HTMLInputElement>;
-
-export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
-  const [error, fieldProps] = useField(name, {
-    validate,
-  });
-  return (
-    <>
-      <label htmlFor={name}>{label}</label>
-      <input id={name} {...inputProps} {...fieldProps} />
-      {error ? <div id={`${name}_error`}>{error.message}</div> : null}
-    </>
-  );
-};
-
-type FieldControllerProps = {
-  name: string;
-  validate?: (value: string) => Error;
-  children: (props: ReturnType<typeof useField>) => React.ReactElement;
-};
-
-export const FieldController = ({
-  name,
-  validate,
-  children,
-}: FieldControllerProps) => {
-  const childProps = useField(name, {
-    validate,
-  });
-  return children(childProps);
 };
