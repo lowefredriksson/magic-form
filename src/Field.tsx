@@ -17,6 +17,12 @@ export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
 };
 type FieldProps = {
   name: string;
-  validate?: (value: string) => Error;
+  validate?: (
+    value: string,
+    fields: {
+      [Key: string]: HTMLInputElement;
+    }
+  ) => Promise<Error>;
+  required?: boolean;
   label: string;
 } & React.HTMLProps<HTMLInputElement>;

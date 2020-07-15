@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { registerRender } from "./renders";
 import { useError } from "./useError";
-import { MagicFormContext, useMagicForm } from "./MagicForm";
+import { MagicFormContext } from "./MagicForm";
 import { Error } from "./Error";
 /**
  *
@@ -11,7 +11,15 @@ import { Error } from "./Error";
 
 export const useField = (
   name: string,
-  options: { validate?: (value: string) => Error; required?: boolean } = {}
+  options: {
+    validate?: (
+      value: string,
+      fields: {
+        [Key: string]: HTMLInputElement;
+      }
+    ) => Promise<Error>;
+    required?: boolean;
+  } = {}
 ) => {
   const { register } = useContext(MagicFormContext);
   const [error, fieldProps] = useError(name, {

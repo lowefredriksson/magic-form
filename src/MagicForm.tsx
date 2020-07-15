@@ -33,7 +33,24 @@ export const MagicForm: React.FC = (props: MagicFormProps) => {
   registerRender("MagicForm");
   return (
     <MagicFormContext.Provider value={magicForm}>
-      <form>{props.children}</form>
+      <form
+        style={{
+          padding: 20,
+          borderRadius: 10,
+          margin: 100,
+          flexDirection: "column",
+          justifyContent: "flex-start",
+          alignItems: "flex-start",
+          display: "flex",
+          width: 500,
+          borderColor: "#333",
+          borderStyle: "solid",
+          borderWidth: 1,
+          alignSelf: "center",
+        }}
+      >
+        {props.children}
+      </form>
     </MagicFormContext.Provider>
   );
 };

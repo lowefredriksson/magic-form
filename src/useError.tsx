@@ -1,10 +1,17 @@
 import { useContext, useState, useCallback, ChangeEvent } from "react";
 import { FieldSpreadProps, MagicFormContext } from "./MagicForm";
 import { Error, errorEquals } from "./Error";
+
 export const useError = (
   name: string,
   options: {
-    validate?: (value: string) => Error;
+    validate?: (
+      value: string,
+      fields: {
+        [Key: string]: HTMLInputElement;
+      }
+    ) => Promise<Error>;
+    required?: boolean;
   } = {}
 ): [Error | null, FieldSpreadProps] => {
   const { fields } = useContext(MagicFormContext);
@@ -12,10 +19,10 @@ export const useError = (
 
   const [error, setError] = useState<Error | null>(null);
 
-  const onBlur = useCallback(() => {
+  const onBlur = useCallback(async () => {
     const field = fields[name];
     if (validate && field) {
-      const valid = validate(field.value);
+      const valid = await validate(field.value, fields);
       if (!errorEquals(error, valid)) {
         setError(valid);
       }
@@ -23,9 +30,9 @@ export const useError = (
   }, [fields, validate, error, name]);
 
   const onChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
+    async (event: ChangeEvent<HTMLInputElement>) => {
       if (error !== null && validate) {
-        const valid = validate(event.target.value);
+        const valid = await validate(event.target.value, fields);
         if (!errorEquals(error, valid)) {
           setError(valid);
         }
