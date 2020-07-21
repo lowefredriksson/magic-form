@@ -2,7 +2,6 @@ import React, { useRef } from "react";
 import "./App.css";
 import { registerRender } from "./renders";
 
-// Core
 
 type ContextType = {
   fields: { [Key: string]: HTMLInputElement };
@@ -15,6 +14,7 @@ export const MagicFormContext = React.createContext<ContextType>({
 });
 
 export const useMagicForm = () => {
+
   const fields = useRef<{ [Key: string]: HTMLInputElement }>({});
 
   const register = (ref: HTMLInputElement | null) => {
@@ -23,7 +23,12 @@ export const useMagicForm = () => {
     }
   };
 
-  return { fields: fields.current, register };
+  const getFormState = () => {
+    return Object.keys(fields.current).reduce((formState, fieldKey) => ({ ...formState, [fieldKey]: fields[fieldKey].value }), {})
+  }
+
+  return { fields: fields.current, register, getFormState };
+
 };
 
 type MagicFormProps = {} & React.HTMLProps<HTMLFormElement>;

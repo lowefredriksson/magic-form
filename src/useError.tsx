@@ -38,7 +38,7 @@ export const useError = (
         }
       }
     },
-    [error, validate]
+    [error, fields, validate]
   );
 
   return [error, { onBlur, onChange }];

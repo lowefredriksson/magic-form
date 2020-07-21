@@ -15,6 +15,7 @@ export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
     </>
   );
 };
+
 type FieldProps = {
   name: string;
   validate?: (

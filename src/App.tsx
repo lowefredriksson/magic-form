@@ -53,6 +53,7 @@ function App() {
                 [Key: string]: HTMLInputElement;
               }
             ) => {
+              console.log("password field", fields["Password"]);
               if (fields["Password"].value !== value) {
                 return { value: true, message: "Should be same as password" };
               }
