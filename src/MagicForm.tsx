@@ -17,6 +17,10 @@ const registerRender = (name: string) => {
   console.log("renders", renders);
 };
 
+type MagicError = {
+  message: string
+} | null;
+
 type ContextType = {
   fields: { [Key: string]: HTMLInputElement };
   register: (ref: HTMLInputElement | null) => void;
@@ -48,20 +52,30 @@ type FieldSpreadProps = {
 const useError = (
   name: string,
   options: {
-    validate?: (value: string) => boolean;
+    validate?: (value: string) => {
+      valid: boolean;
+      message?: string;
+    };
   } = {}
-): [boolean | null, FieldSpreadProps] => {
+): [{
+  valid: boolean;
+  message?: string;
+} | null, FieldSpreadProps] => {
   const { fields } = useContext(MagicFormContext);
   const { validate } = options;
 
-  const [error, setError] = useState<boolean | null>(null);
+  const [error, setError] = useState<{
+    valid: boolean;
+    message?: string;
+  } | null>(null);
 
   const onBlur = useCallback(() => {
     const field = fields[name];
     if (validate && field) {
-      const valid = validate(field.value);
-      if (!valid !== error) {
-        setError(!valid);
+      const fieldStatus = validate(field.value);
+      console.log("onBlur", fieldStatus, error);
+      if (error === null || (fieldStatus.valid !== error.valid)) {
+        setError(fieldStatus);
       }
     }
   }, [fields, validate, error, name]);
@@ -69,9 +83,10 @@ const useError = (
   const onChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       if (error !== null && validate) {
-        const valid = validate(event.target.value);
-        if (!valid !== error) {
-          setError(!valid);
+        const fieldStatus = validate(event.target.value);
+        console.log("onChange", fieldStatus, error);
+        if (fieldStatus.valid !== error.valid) {
+          setError(fieldStatus);
         }
       }
     },
@@ -83,7 +98,10 @@ const useError = (
 
 export const useField = (
   name: string,
-  options: { validate?: (value: string) => boolean, required?: boolean } = {}
+  options: { validate?: (value: string) => {
+    valid: boolean;
+    message?: string;
+  }, required?: boolean } = {}
 ) => {
   const { register } = useContext(MagicFormContext);
   const [error, fieldProps] = useError(name, {
@@ -109,7 +127,10 @@ export const useField = (
 
 type FieldProps = {
   name: string;
-  validate?: (value: string) => boolean;
+  validate?: (value: string) => {
+    valid: boolean;
+    message?: string;
+  };
   label: string;
 } & React.HTMLProps<HTMLInputElement>;
 
@@ -125,9 +146,9 @@ export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
         {...inputProps}
         {...fieldProps}
       />
-      {error ? (
-        <div id={`${name}_error`}>
-          ERROR
+      {error && !error.valid ? (
+        <div id={`${name}_error`} role="alert">
+          {error.message}
         </div>
       ) : null}
     </>
@@ -136,7 +157,10 @@ export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
 
 type FieldControllerProps = {
   name: string;
-  validate?: (value: string) => boolean;
+  validate?: (value: string) => {
+    valid: boolean;
+    message?: string;
+  };
   children: (props: ReturnType<typeof useField>) => React.ReactElement;
 };
 
