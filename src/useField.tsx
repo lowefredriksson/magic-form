@@ -15,7 +15,7 @@ export const useField = (
     validate?: (
       value: string,
       fields: {
-        [Key: string]: HTMLInputElement;
+        [Key: string]: any;
       }
     ) => Promise<Error>;
     required?: boolean;

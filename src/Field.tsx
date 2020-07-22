@@ -20,8 +20,8 @@ type FieldProps = {
   name: string;
   validate?: (
     value: string,
-    fields: {
-      [Key: string]: HTMLInputElement;
+    formState: {
+      [Key: string]: any;
     }
   ) => Promise<Error>;
   required?: boolean;

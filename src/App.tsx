@@ -1,6 +1,6 @@
 import React from "react";
 import "./App.css";
-import { MagicForm } from "./MagicForm";
+import { MagicForm, useMagicForm } from "./MagicForm";
 import { Field } from "./Field";
 import { FormLayout } from "./FormLayout";
 
@@ -9,9 +9,10 @@ const isUsernameAvailable = async () => {
 };
 
 function App() {
+  const magicForm = useMagicForm();
   return (
     <div className="App">
-      <MagicForm>
+      <MagicForm magicForm={magicForm}>
         <FormLayout>
           <Field
             label="Username"
@@ -34,10 +35,11 @@ function App() {
             validate={async (
               value: string,
               fields: {
-                [Key: string]: HTMLInputElement;
+                [Key: string]: any;
               }
             ) => {
               console.log("fields 2", fields);
+              console.log("formState", magicForm.getFormState());
               return value.length >= 8
                 ? { value: false }
                 : { value: true, message: "Needs to be 8 or more characters" };
@@ -50,11 +52,10 @@ function App() {
             validate={async (
               value: string,
               fields: {
-                [Key: string]: HTMLInputElement;
+                [Key: string]: any;
               }
             ) => {
-              console.log("password field", fields["Password"]);
-              if (fields["Password"].value !== value) {
+              if (fields["Password"] !== value) {
                 return { value: true, message: "Should be same as password" };
               }
 

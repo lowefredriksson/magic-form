@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import "./App.css";
 import { registerRender } from "./renders";
+import { getFormStateFromFields } from "./getFormStateFromFields";
 
 
 type MagicError = {
@@ -27,22 +28,19 @@ export const useMagicForm = () => {
     }
   };
 
-  const getFormState = () => {
-    return Object.keys(fields.current).reduce((formState, fieldKey) => ({ ...formState, [fieldKey]: fields.current[fieldKey].value }), {})
-  }
+  const getFormState = () => getFormStateFromFields(fields.current);
 
   return { fields: fields.current, register, getFormState };
 
 };
 
-type MagicFormProps = {} & React.HTMLProps<HTMLFormElement>;
+type MagicFormProps = { magicForm: ReturnType<typeof useMagicForm> } & React.HTMLProps<HTMLFormElement>;
 
-export const MagicForm: React.FC = (props: MagicFormProps) => {
-  const magicForm = useMagicForm();
+export const MagicForm: React.FC<MagicFormProps> = ({ magicForm, children }: MagicFormProps) => {
   registerRender("MagicForm");
   return (
     <MagicFormContext.Provider value={magicForm}>
-      <form>{props.children}</form>
+      <form>{children}</form>
     </MagicFormContext.Provider>
   );
 };
