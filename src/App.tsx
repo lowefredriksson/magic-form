@@ -1,29 +1,69 @@
 import React from "react";
 import "./App.css";
-import { MagicForm, Field, FieldController, useField } from "./MagicForm";
+import { MagicForm } from "./MagicForm";
+import { Field } from "./Field";
+import { FormLayout } from "./FormLayout";
+
+const isUsernameAvailable = async () => {
+  return new Promise((resolve) => setTimeout(() => resolve(false), 2000));
+};
 
 function App() {
-  const [field1Error, field1Props] = useField("firstname", {
-    validate: (value: string) => ({ valid: value.length > 4, message: "Name needs to be atleast 4 characters long" }),
-  });
   return (
     <div className="App">
       <MagicForm>
-        {/* <input type="fname" {...field1Props} />
-  {field1Error && !field1Error.valid ? <div>{field1Error.message}</div> : null} */}
-        <Field
-          label="Username"
-          name="Username"
-          type="email"
-          validate={(name: string) => ({ valid: name.length > 4, message: "Name needs to be atleast 4 characters long" })}
-          required
-        />
-        {/* <FieldController
-          name="Password"
-          validate={(password: string) => ({ valid: password.length > 4, message: password.length < 4 ? "Password needs to be atleast 4 characters long" : undefined })}
-        >
-          {([error, props]) => <input type="password" {...props} />}
-        </FieldController> */}
+        <FormLayout>
+          <Field
+            label="Username"
+            name="Username"
+            type="email"
+            validate={async (name: string) => {
+              console.log("validate username");
+              const available = await isUsernameAvailable();
+              console.log("available", available);
+              return available
+                ? { value: false }
+                : { value: true, message: "Username is already taken" };
+            }}
+            required
+          />
+          <Field
+            label="Password"
+            name="Password"
+            type="password"
+            validate={async (
+              value: string,
+              fields: {
+                [Key: string]: HTMLInputElement;
+              }
+            ) => {
+              console.log("fields 2", fields);
+              return value.length >= 8
+                ? { value: false }
+                : { value: true, message: "Needs to be 8 or more characters" };
+            }}
+          />
+          <Field
+            label="Confirm Password"
+            name="PasswordConfirm"
+            type="password"
+            validate={async (
+              value: string,
+              fields: {
+                [Key: string]: HTMLInputElement;
+              }
+            ) => {
+              console.log("password field", fields["Password"]);
+              if (fields["Password"].value !== value) {
+                return { value: true, message: "Should be same as password" };
+              }
+
+              return value.length >= 8
+                ? { value: false }
+                : { value: true, message: "Needs to be 8 or more characters" };
+            }}
+          />
+        </FormLayout>
       </MagicForm>
     </div>
   );
