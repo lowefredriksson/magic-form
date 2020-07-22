@@ -28,7 +28,7 @@ export const useMagicForm = () => {
   };
 
   const getFormState = () => {
-    return Object.keys(fields.current).reduce((formState, fieldKey) => ({ ...formState, [fieldKey]: fields[fieldKey].value }), {})
+    return Object.keys(fields.current).reduce((formState, fieldKey) => ({ ...formState, [fieldKey]: fields.current[fieldKey].value }), {})
   }
 
   return { fields: fields.current, register, getFormState };
