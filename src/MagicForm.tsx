@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import "./App.css";
 import { registerRender } from "./renders";
 import { getFormStateFromFields } from "./getFormStateFromFields";
+import { cursorTo } from "readline";
 
 
 type MagicError = {
@@ -38,9 +39,21 @@ type MagicFormProps = { magicForm: ReturnType<typeof useMagicForm> } & React.HTM
 
 export const MagicForm: React.FC<MagicFormProps> = ({ magicForm, children }: MagicFormProps) => {
   registerRender("MagicForm");
+  const formRef = useRef<HTMLFormElement>();
+  const onClick = () => { 
+    //
+    // console.log(
+    //   "formRef", 
+    //   // 
+    //   (elements as any[]).reduce((acc, cur) => ({ ...acc, [cur.id]: cur.value }), {})
+    // ); 
+  }
   return (
     <MagicFormContext.Provider value={magicForm}>
-      <form>{children}</form>
+      <form ref={formRef as any}>{children}</form>
+      <button 
+        type="button" 
+        onClick={onClick}>Log form</button>
     </MagicFormContext.Provider>
   );
 };

@@ -14,6 +14,7 @@ function App() {
     <div className="App">
       <MagicForm magicForm={magicForm}>
         <FormLayout>
+        <h1>Log in</h1>
           <Field
             label="Username"
             name="Username"

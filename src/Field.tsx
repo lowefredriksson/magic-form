@@ -1,6 +1,6 @@
 import React from "react";
 import { useField } from "./useField";
-import { Error } from "./Error";
+import { ErrorType, Error } from "./Error";
 //-------------------------------------------
 
 export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
@@ -11,7 +11,8 @@ export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
     <>
       <label htmlFor={name}>{label}</label>
       <input id={name} {...inputProps} {...fieldProps} />
-      {error ? <div id={`${name}_error`}>{error.message}</div> : null}
+      <Error name={name} error={error as ErrorType | null}/>
+      {/* {error ? <div id={`${name}_error`}>{error.message}</div> : null} */}
     </>
   );
 };
@@ -23,7 +24,7 @@ type FieldProps = {
     formState: {
       [Key: string]: any;
     }
-  ) => Promise<Error>;
+  ) => Promise<ErrorType>;
   required?: boolean;
   label: string;
 } & React.HTMLProps<HTMLInputElement>;

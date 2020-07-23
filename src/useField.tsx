@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { registerRender } from "./renders";
 import { useError } from "./useError";
 import { MagicFormContext } from "./MagicForm";
-import { Error } from "./Error";
+import { ErrorType } from "./Error";
 /**
  *
  * @param name
@@ -17,7 +17,7 @@ export const useField = (
       fields: {
         [Key: string]: any;
       }
-    ) => Promise<Error>;
+    ) => Promise<ErrorType>;
     required?: boolean;
   } = {}
 ) => {

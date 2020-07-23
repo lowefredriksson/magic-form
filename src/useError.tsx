@@ -1,6 +1,6 @@
 import { useContext, useState, useCallback, ChangeEvent } from "react";
 import { FieldSpreadProps, MagicFormContext } from "./MagicForm";
-import { Error, errorEquals } from "./Error";
+import { ErrorType, errorEquals } from "./Error";
 import { getFormStateFromFields } from "./getFormStateFromFields";
 
 export const useError = (
@@ -11,24 +11,24 @@ export const useError = (
       fields: {
         [Key: string]: string;
       }
-    ) => Promise<Error>;
+    ) => Promise<ErrorType>;
     required?: boolean;
   } = {}
-): [Error | null, FieldSpreadProps] => {
+): [ErrorType | null, FieldSpreadProps] => {
   const { fields } = useContext(MagicFormContext);
   const { validate } = options;
 
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<ErrorType | null>(null);
 
   const onBlur = useCallback(async () => {
     const field = fields[name];
     if (validate && field) {
       const valid = await validate(field.value, getFormStateFromFields(fields));
-      if (!errorEquals(error, valid)) {
-        setError(valid);
-      }
+      // trigger aria-live on error to annonce
+      setError(null);
+      setError(valid);
     }
-  }, [fields, validate, error, name]);
+  }, [fields, validate, name]);
 
   const onChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
