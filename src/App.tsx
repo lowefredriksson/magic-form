@@ -20,27 +20,23 @@ function App() {
             name="Username"
             type="email"
             validate={async (name: string) => {
-              console.log("validate username");
               const available = await isUsernameAvailable();
-              console.log("available", available);
               return available
                 ? { value: false }
                 : { value: true, message: "Username is already taken" };
             }}
-            required
           />
           <Field
             label="Password"
             name="Password"
             type="password"
+            //dependencies=["password"]
             validate={async (
               value: string,
               fields: {
                 [Key: string]: any;
               }
             ) => {
-              console.log("fields 2", fields);
-              console.log("formState", magicForm.getFormState());
               return value.length >= 8
                 ? { value: false }
                 : { value: true, message: "Needs to be 8 or more characters" };
@@ -50,6 +46,8 @@ function App() {
             label="Confirm Password"
             name="PasswordConfirm"
             type="password"
+            //strategy={ change: (touched) => touched, blur: true, submit: true }
+            //strategy=["changeAfterTouch", "blur", "submit", "password"]
             validate={async (
               value: string,
               fields: {
@@ -65,6 +63,7 @@ function App() {
                 : { value: true, message: "Needs to be 8 or more characters" };
             }}
           />
+          <input type="submit" value="send"/>
         </FormLayout>
       </MagicForm>
     </div>

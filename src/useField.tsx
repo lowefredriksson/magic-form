@@ -27,11 +27,11 @@ export const useField = (
   });
   let props: { [Key: string]: any } = {
     ...fieldProps,
-    ref: register,
+    ref: (ref: HTMLInputElement) => register(ref, options),
     name,
   };
-  props["area-invalid"] = error ? "true" : "false";
-  props["area-describyBy"] = `${name}_error`;
+  props["aria-invalid"] = error ? "true" : "false";
+  props["aria-describyBy"] = `${name}_error`;
   if (options.required) {
     props["required"] = true;
     props["aria-required"] = true;

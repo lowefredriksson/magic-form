@@ -1,4 +1,4 @@
-import { useContext, useState, useCallback, ChangeEvent } from "react";
+import { useContext, useState, useCallback, ChangeEvent, FocusEvent } from "react";
 import { FieldSpreadProps, MagicFormContext } from "./MagicForm";
 import { ErrorType, errorEquals } from "./Error";
 import { getFormStateFromFields } from "./getFormStateFromFields";
@@ -20,20 +20,23 @@ export const useError = (
 
   const [error, setError] = useState<ErrorType | null>(null);
 
-  const onBlur = useCallback(async () => {
-    const field = fields[name];
-    if (validate && field) {
-      const valid = await validate(field.value, getFormStateFromFields(fields));
+  const onBlur = useCallback(async (event: FocusEvent<HTMLInputElement>) => {
+    // const field = fields.find(f => f.name === name);
+    if (validate) {
+      const valid = await validate(event.target.value, getFormStateFromFields(fields.map(({ ref }) => ref)));
       // trigger aria-live on error to annonce
-      setError(null);
-      setError(valid);
+      // setError(null);
+      // setError(valid);
+      if (!errorEquals(error, valid)) {
+        setError(valid);
+      }
     }
-  }, [fields, validate, name]);
+  }, [fields, validate, name, error]);
 
   const onChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       if (error !== null && validate) {
-        const valid = await validate(event.target.value, getFormStateFromFields(fields));
+        const valid = await validate(event.target.value,   getFormStateFromFields(fields.map(({ ref }) => ref)));
         if (!errorEquals(error, valid)) {
           setError(valid);
         }

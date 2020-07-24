@@ -1,3 +1,3 @@
-export const getFormStateFromFields = (fields: { [Key: string]: HTMLInputElement; }) => {
-  return Object.keys(fields).reduce((formState, fieldKey) => ({ ...formState, [fieldKey]: fields[fieldKey].value }), {});
+export const getFormStateFromFields = (fields: HTMLInputElement[]) => {
+  return fields.reduce((formState, field) => ({ ...formState, [field.name]: field.value }), {});
 };
