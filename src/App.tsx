@@ -32,7 +32,7 @@ function App() {
             type="password"
             //dependencies=["password"]
             validate={async (
-              value: string,
+              value: string,    
               fields: {
                 [Key: string]: any;
               }
