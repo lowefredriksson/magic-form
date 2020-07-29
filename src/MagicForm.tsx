@@ -2,35 +2,20 @@ import React, { useRef } from "react";
 import "./App.css";
 import { registerRender } from "./renders";
 import { getFormStateFromFields } from "./getFormStateFromFields";
-import { ErrorType } from "./Error";
+import { FormContextType, FieldRef, FieldOptions } from "./types";
 
-type ContextType = {
-  fields: { ref: HTMLInputElement, options?: FieldOptions }[];
-  register: (ref: HTMLInputElement | null, options?: FieldOptions) => void;
-};
-
-type FieldOptions = {
-  validate?: (
-    value: string,
-    fields: {
-      [Key: string]: any;
-    }
-  ) => Promise<ErrorType>;
-  required?: boolean;
-} 
-
-export const MagicFormContext = React.createContext<ContextType>({
+export const MagicFormContext = React.createContext<FormContextType>({
   register: (ref) => {},
   fields: [],
 });
 
 export const useMagicForm = () => {
 
-  const fields = useRef<{ ref: HTMLInputElement, options: FieldOptions }[]>([]);
+  const fields = useRef<{ ref: FieldRef, options: FieldOptions }[]>([]);
 
   const register = (ref: HTMLInputElement | null, options: FieldOptions = {}) => {
     if (ref && ref.name) {
-      fields.current = [...fields.current.filter(r => r.ref.name !== ref.name) ,({ ref, options })];
+      fields.current = [...fields.current.filter(r => r.ref.name !== ref.name), ({ ref, options })];
     }
   };
 
