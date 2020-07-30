@@ -31,10 +31,11 @@ export const useError = (
         setError(valid);
       }
     }
-  }, [fields, validate, name, error]);
+  }, [fields, validate, error]);
 
   const onChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
+      console.log("onChange target", event.target)
       if (error !== null && validate) {
         const valid = await validate(event.target.value,   getFormStateFromFields(fields.map(({ ref }) => ref)));
         if (!errorEquals(error, valid)) {

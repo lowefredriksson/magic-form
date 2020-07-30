@@ -12,7 +12,6 @@ export const Field = ({ name, validate, label, ...inputProps }: FieldProps) => {
       <label htmlFor={name}>{label}</label>
       <input id={name} {...inputProps} {...fieldProps} />
       <Error name={name} error={error as ErrorType | null}/>
-      {/* {error ? <div id={`${name}_error`}>{error.message}</div> : null} */}
     </>
   );
 };

@@ -2,6 +2,8 @@ import React, { useState, useRef } from "react";
 import "./App.css";
 import { FormLayout } from "./FormLayout";
 import { registerRender } from "./renders";
+import { useMagicForm, MagicForm } from "./MagicForm";
+import { Field } from "./Field";
 
 type FormContextValue<T> = {
   values: T;
@@ -34,9 +36,21 @@ const useOnChange = () => {
 function App() {
   const formBag = useForm();
   const onChange = useOnChange();
+  const bag = useMagicForm();
   registerRender("app");
   return (
     <div className="App">
+      <MagicForm magicForm={bag}>
+        <Field
+          label="Username"
+          name="username"
+          type="email"
+          validate={(value) => {
+            return Promise.resolve({ message: "dasd" })
+          }}
+        />
+
+      </MagicForm>
       <FormContext.Provider value={formBag}>
         <form>
           <FormLayout>

@@ -1,14 +1,28 @@
-import React, { useContext } from "react";
+import { useContext, useState } from "react";
 import { registerRender } from "./renders";
 import { useError } from "./useError";
 import { MagicFormContext } from "./MagicForm";
 import { ErrorType } from "./Error";
+
+const useTouched = (name: string) => {
+
+  const [touched, setTouched] = useState(false);
+
+  const onBlur = () => {
+    if (touched === false) {
+      setTouched(true);
+    }
+  }
+
+  return [touched, { onBlur }]
+
+}
+
 /**
  *
  * @param name
  * @param options
  */
-
 export const useField = (
   name: string,
   options: {
@@ -21,12 +35,12 @@ export const useField = (
     required?: boolean;
   } = {}
 ) => {
-  const { register } = useContext(MagicFormContext);
-  const [error, fieldProps] = useError(name, {
+  const { register, setTouched, getTouched } = useContext(MagicFormContext);
+  const [error, errorProps] = useError(name, {
     validate: options.validate,
   });
   let props: { [Key: string]: any } = {
-    ...fieldProps,
+    ...errorProps,
     ref: (ref: HTMLInputElement) => register(ref, options),
     name,
   };

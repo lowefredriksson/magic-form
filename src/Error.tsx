@@ -2,7 +2,6 @@ import React from 'react';
 
 export type ErrorType = {
   message?: string;
-  value: boolean;
 };
 //https://almerosteyn.com/2017/09/aria-live-regions-in-react
 //https://medium.com/@gaurav5430/accessibility-quick-wins-error-messages-with-aria-live-7a622cb606f9
@@ -26,10 +25,6 @@ export const errorEquals = (oldError: ErrorType | null, newError: ErrorType | nu
   }
 
   if (oldError !== null && newError === null) {
-    return false;
-  }
-
-  if (oldError!.value !== newError!.value) {
     return false;
   }
 

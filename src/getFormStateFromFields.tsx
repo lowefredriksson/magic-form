@@ -1,5 +1,5 @@
-import { FieldRef } from "./types";
+import { FieldsRefValue } from "./types";
 
-export const getFormStateFromFields = (fields: FieldRef[]) => {
-  return fields.reduce((formState, field) => ({ ...formState, [field.name]: field.value }), {});
+export const getFormStateFromFields = (fields: FieldsRefValue) => {
+  return Object.keys(fields).map(key => fields[key].ref).reduce((formState, field) => ({ ...formState, [field.name]: field.value }), {});
 };
