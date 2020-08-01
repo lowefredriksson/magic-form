@@ -3,7 +3,7 @@ import "./App.css";
 import { FormLayout } from "./FormLayout";
 import { registerRender } from "./renders";
 import { useMagicForm, MagicForm } from "./MagicForm";
-import { Field } from "./Field";
+import { Field } from "./Input";
 
 type FormContextValue<T> = {
   values: T;
@@ -21,37 +21,71 @@ function useForm() {
 }
 
 const useOnChange = () => {
-  const values = useRef({})
-  const onChange = (event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
+  const values = useRef({});
+  const onChange = (
+    event: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>
+  ) => {
     const name = event.target.name;
     const value = event.target.value;
     console.log("name", name, "value", value);
     if (name) {
-      values.current = { ...values.current, [name]: value  }
+      values.current = { ...values.current, [name]: value };
     }
-  }
-  return onChange
-}
+  };
+  return onChange;
+};
 
 function App() {
-  const formBag = useForm();
-  const onChange = useOnChange();
+  // const formBag = useForm();
+  // const onChange = useOnChange();
   const bag = useMagicForm();
   registerRender("app");
   return (
     <div className="App">
-      <MagicForm magicForm={bag}>
+      {/* <MagicForm magicForm={bag} validation={(values) => {
+          return {}
+        }}> */}
+      <FormLayout>
         <Field
           label="Username"
           name="username"
           type="email"
           validate={(value) => {
-            return Promise.resolve({ message: "dasd" })
+            return Promise.resolve(
+              value.length < 4
+                ? { message: "Should be at least 4 charchters long" }
+                : null
+            );
           }}
         />
-
-      </MagicForm>
-      <FormContext.Provider value={formBag}>
+        <Field
+          label="Password"
+          name="password"
+          type="password"
+          revalidateFields={["confirm"]}
+          validate={(value) => {
+            return Promise.resolve(
+              value.length < 8
+                ? { message: "Should be at least 8 charchters long" }
+                : null
+            );
+          }}
+        />
+        <Field
+          label="Confirm Password"
+          name="confirm"
+          type="password"
+          validate={(value, fields) => {
+            return Promise.resolve(
+              value === fields["password"]
+                ? null
+                : { message: "Should match password" }
+            );
+          }}
+        />
+      </FormLayout>
+      {/* </MagicForm> */}
+      {/* <FormContext.Provider value={formBag}>
         <form>
           <FormLayout>
             <input name="firstname" onChange={onChange}/>
@@ -80,7 +114,7 @@ function App() {
             <label htmlFor="other">Other</label>
           </FormLayout>
         </form>
-      </FormContext.Provider>
+      </FormContext.Provider> */}
     </div>
   );
 }

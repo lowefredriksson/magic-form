@@ -1,46 +1,32 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { registerRender } from "./renders";
 import { useError } from "./useError";
 import { MagicFormContext } from "./MagicForm";
-import { ErrorType } from "./Error";
+import { ErrorResolver } from "./types";
 
-const useTouched = (name: string) => {
-
-  const [touched, setTouched] = useState(false);
-
-  const onBlur = () => {
-    if (touched === false) {
-      setTouched(true);
-    }
-  }
-
-  return [touched, { onBlur }]
-
-}
+type UseFieldOptions = {
+  validate?: ErrorResolver;
+  revalidateFields?: string[];
+  required?: boolean;
+};
 
 /**
  *
  * @param name
  * @param options
  */
-export const useField = (
-  name: string,
-  options: {
-    validate?: (
-      value: string,
-      fields: {
-        [Key: string]: any;
-      }
-    ) => Promise<ErrorType>;
-    required?: boolean;
-  } = {}
-) => {
-  const { register, setTouched, getTouched } = useContext(MagicFormContext);
+export const useField = (name: string, options: UseFieldOptions = {}) => {
+  const { register, setTouched } = useContext(MagicFormContext);
   const [error, errorProps] = useError(name, {
     validate: options.validate,
   });
+  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched(name);
+    errorProps.onBlur(e);
+  };
   let props: { [Key: string]: any } = {
     ...errorProps,
+    onBlur,
     ref: (ref: HTMLInputElement) => register(ref, options),
     name,
   };

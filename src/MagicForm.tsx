@@ -1,8 +1,13 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import "./App.css";
 import { registerRender } from "./renders";
 import { getFormStateFromFields } from "./getFormStateFromFields";
-import { FormContextType, FieldRef, FieldOptions, FieldsRefValue } from "./types";
+import {
+  FormContextType,
+  FieldRef,
+  FieldOptions,
+  FieldsRefValue,
+} from "./types";
 
 export const MagicFormContext = React.createContext<FormContextType>({
   register: (ref, options) => {},
@@ -10,15 +15,13 @@ export const MagicFormContext = React.createContext<FormContextType>({
   setTouched: (name) => {},
   getTouched: (name) => {
     return false;
-  }
+  },
 });
 
-
-
 export const useMagicForm = () => {
-
   const fields = useRef<FieldsRefValue>({});
-
+  const errors = useState<{ [Key in string]: string }>({});
+  const touched = useState<{ [Key in string]: boolean }>({});
   const register = (ref: FieldRef, options: FieldOptions = {}) => {
     if (ref && ref.name) {
       fields.current = {
@@ -26,9 +29,9 @@ export const useMagicForm = () => {
         [ref.name]: {
           ...(fields.current[ref.name] ?? {}),
           ref,
-          options
-        }
-      }
+          options,
+        },
+      };
     }
   };
 
@@ -40,12 +43,12 @@ export const useMagicForm = () => {
 
   const validateForm = async () => {
     // TODO: recive fields in order
-    const _fields = Object.keys(fields.current).map(key => {
+    const _fields = Object.keys(fields.current).map((key) => {
       const field = fields.current[key];
       return field;
-    })
+    });
     for (var a = 0; a < _fields.length; a++) {
-      const fieldEntry = _fields[a]
+      const fieldEntry = _fields[a];
       if (!fieldEntry.options.validate) {
         return false;
       }
@@ -56,48 +59,53 @@ export const useMagicForm = () => {
         return false;
       }
     }
-    return true
-  }
+    return true;
+  };
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const valid = await validateForm();
     console.log("FORM VALID: ", valid);
-  }
+  };
 
   const setTouched = (name: string) => {
-    console.log("touched");
+    console.log("touched", name);
     fields.current = {
       ...fields.current,
       [name]: {
         ...fields.current[name],
         meta: {
-          touched: true
-        }
-      }
-    }
-  }
+          touched: true,
+        },
+      },
+    };
+  };
   const getTouched = (name: string) => {
-    return !!fields.current[name]?.meta.touched
-  }
+    return !!fields.current[name]?.meta.touched;
+  };
 
-  return { fields: fields.current, register, getFormValues, onSubmit, setTouched, getTouched };
+  return {
+    fields: fields.current,
+    register,
+    getFormValues,
+    onSubmit,
+    setTouched,
+    getTouched,
+  };
 };
 
-type MagicFormProps = { magicForm: ReturnType<typeof useMagicForm> } & React.HTMLProps<HTMLFormElement>;
+type MagicFormProps = {
+  magicForm: ReturnType<typeof useMagicForm>;
+} & React.HTMLProps<HTMLFormElement>;
 
-export const MagicForm: React.FC<MagicFormProps> = ({ magicForm, children }: MagicFormProps) => {
+export const MagicForm: React.FC<MagicFormProps> = ({
+  magicForm,
+  children,
+}: MagicFormProps) => {
   registerRender("MagicForm");
-  const formRef = useRef<HTMLFormElement>();
-  const onClick = () => { 
-
-  }
   return (
     <MagicFormContext.Provider value={magicForm}>
-      <form ref={formRef as any} onSubmit={magicForm.onSubmit} >{children}</form>
-      <button 
-        type="button" 
-        onClick={onClick}>Log form</button>
+      <form onSubmit={magicForm.onSubmit}>{children}</form>
     </MagicFormContext.Provider>
   );
 };
