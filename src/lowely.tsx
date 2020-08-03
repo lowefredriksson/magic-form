@@ -51,6 +51,26 @@ export const Child: React.FC<{
   );
 };
 
+// const getValue = (event: React.ChangeEvent<HTMLFormElement>) => {
+//     // if (isFileInput(ref)) {
+//     //     return ref.files;
+//     //   }
+
+//     //   if (isRadioInput(ref)) {
+//     //     return getRadioValue(field.options).value;
+//     //   }
+
+//     //   if (isMultipleSelect(ref)) {
+//     //     return getMultipleSelectValue(ref.options);
+//     //   }
+
+//     //   if (isCheckBox(ref)) {
+//     //     return getCheckboxValue(field.options).value;
+//     //   }
+
+//     //   return value;
+// }
+
 const useField = (name: string, config: FieldConfig) => {
   const { setValue, setTouched, registerField } = useContext(Context);
   const onChange = useCallback(
@@ -342,7 +362,7 @@ function useForm({
       errors.current.clear();
       values.current.clear();
       reRender("");
-    }).catch;
+    });
 
     // : if error :
 
