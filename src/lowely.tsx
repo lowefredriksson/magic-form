@@ -91,17 +91,7 @@ const Field = ({
   const fieldProps = useField(name, {
     validate,
   });
-  return (
-    <div
-      style={{
-        marginTop: "15px",
-        padding: "5px",
-      }}
-    >
-      <input {...fieldProps} />
-      <p>Renders: {counter}</p>
-    </div>
-  );
+  return <input {...fieldProps} />;
 };
 
 const ErrorComponent = ({ name }: { name: string }) => {
@@ -124,7 +114,7 @@ const ErrorComponent = ({ name }: { name: string }) => {
   );
 };
 
-type Error = string | undefined;
+type Error = string;
 type Value = number | string;
 type ValidationResolver = (
   value: Value,
@@ -257,6 +247,7 @@ function useForm({
 }: {
   onSubmit: (values: Map<string, Value>) => Promise<any>;
 }) {
+  const [_, reRender] = useState("");
   const values = useRef<Map<string, Value>>(new Map());
   const fields = useRef<Map<string, Field>>(new Map());
   const errors = useRef<Map<string, Error>>(new Map());
@@ -296,10 +287,23 @@ function useForm({
   ) => {
     const prev = errors.current.get(key);
     const next = validate(value, values.current);
-    errors.current.set(key, next);
+    if (next === undefined) {
+      errors.current.delete(key);
+    } else {
+      errors.current.set(key, next);
+    }
     if (prev !== next) {
       notifyListeners(errorListeners, key, next);
     }
+  };
+
+  const validateForm = () => {
+    return values.current.forEach((value, key, map) => {
+      const resolver = fields.current.get(key)?.config.validate;
+      if (resolver) {
+        validateValue(key, value, resolver);
+      }
+    });
   };
 
   const setValue = useCallback(
@@ -308,16 +312,12 @@ function useForm({
       values.current.set(key, value);
       if (prev !== value) {
         notifyListeners(valueListeners, key, value);
-        values.current.forEach((value, key, map) => {
-          const resolver = fields.current.get(key)?.config.validate;
-          if (resolver) {
-            validateValue(key, value, resolver);
-          }
-        });
+        validateForm();
       }
     },
     [values, notifyListeners, valueListeners, validateValue]
   );
+
   const setTouched = useCallback(
     (key: string) => {
       if (!touched.current.has(key)) {
@@ -327,11 +327,22 @@ function useForm({
     },
     [touched, notifyListeners, touchedListeners]
   );
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // set is validating ref true
     // set all fields touched
+    fields.current.forEach((_, key) => {
+      touched.current.add(key);
+    });
     // run validation
+    validateForm();
+    onSubmit(values.current).then(() => {
+      console.log("submitted");
+      touched.current.clear();
+      errors.current.clear();
+      values.current.clear();
+      reRender("");
+    });
 
     // : if error :
 
@@ -394,7 +405,6 @@ export const Lowely = () => {
       return Promise.resolve(true);
     },
   });
-  const field1 = useField("firstname", { validate: () => "hej" });
   const count = useRenderCounter();
   return (
     <div
@@ -417,8 +427,6 @@ export const Lowely = () => {
           }}
           onSubmit={handleSubmit}
         >
-          <input {...field1} />
-          <ErrorComponent name="firstname" />
           <Field
             name="password"
             validate={(value: Value) =>
