@@ -342,7 +342,7 @@ function useForm({
       errors.current.clear();
       values.current.clear();
       reRender("");
-    });
+    }).catch;
 
     // : if error :
 
