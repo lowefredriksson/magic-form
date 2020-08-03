@@ -92,10 +92,15 @@ const Field = ({
     validate,
   });
   return (
-    <>
+    <div
+      style={{
+        marginTop: "15px",
+        padding: "5px",
+      }}
+    >
       <input {...fieldProps} />
       <p>Renders: {counter}</p>
-    </>
+    </div>
   );
 };
 
@@ -106,7 +111,8 @@ const ErrorComponent = ({ name }: { name: string }) => {
   return (
     <div
       style={{
-        padding: "20px",
+        padding: "5px",
+        borderRadius: "10px",
         borderColor: "black",
         borderWidth: 1,
         borderStyle: "solid",
@@ -283,15 +289,16 @@ function useForm({
     unregisterTouchedListener,
   ] = useListeners();
 
-  const validateValue = (key: string, value: Value) => {
-    const field = fields.current.get(key);
-    if (field?.config.validate) {
-      const prev = errors.current.get(key);
-      const next = field.config.validate(value, values.current);
-      errors.current.set(key, next);
-      if (prev !== next) {
-        notifyListeners(errorListeners, key, next);
-      }
+  const validateValue = (
+    key: string,
+    value: Value,
+    validate: ValidationResolver
+  ) => {
+    const prev = errors.current.get(key);
+    const next = validate(value, values.current);
+    errors.current.set(key, next);
+    if (prev !== next) {
+      notifyListeners(errorListeners, key, next);
     }
   };
 
@@ -302,7 +309,10 @@ function useForm({
       if (prev !== value) {
         notifyListeners(valueListeners, key, value);
         values.current.forEach((value, key, map) => {
-          validateValue(key, value);
+          const resolver = fields.current.get(key)?.config.validate;
+          if (resolver) {
+            validateValue(key, value, resolver);
+          }
         });
       }
     },
@@ -384,19 +394,30 @@ export const Lowely = () => {
       return Promise.resolve(true);
     },
   });
+  const field1 = useField("firstname", { validate: () => "hej" });
   const count = useRenderCounter();
   return (
-    <Context.Provider value={formBag}>
-      <div>
-        <form onSubmit={handleSubmit}>
-          <Field
-            name="firstname"
-            validate={(value: Value) =>
-              (value as string).length < 4
-                ? "Should be at least 4 characters"
-                : undefined
-            }
-          />
+    <div
+      style={{
+        display: "flex",
+        width: "100vw",
+        height: "100vh",
+        justifyContent: "center",
+        alignItems: "center",
+        flexDirection: "column",
+      }}
+    >
+      <Context.Provider value={formBag}>
+        <form
+          style={{
+            width: "400px",
+            display: "flex",
+            alignItems: "stretch",
+            flexDirection: "column",
+          }}
+          onSubmit={handleSubmit}
+        >
+          <input {...field1} />
           <ErrorComponent name="firstname" />
           <Field
             name="password"
@@ -420,8 +441,8 @@ export const Lowely = () => {
           <ErrorComponent name="confirm password" />
           <input type="submit" value="Submit" />
         </form>
-        Renders {count}
-      </div>
-    </Context.Provider>
+      </Context.Provider>
+      Renders {count}
+    </div>
   );
 };
