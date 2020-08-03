@@ -18,5 +18,7 @@ export type FormContextType = {
   fields: FieldsRefValue;
   register: (ref: FieldRef, options?: FieldOptions) => void;
   setTouched: (name: string) => void;
-  getTouched: (name: string) => boolean; 
+  setError: (name: string, error: string) => void;
+  touched: { [Key in string]: boolean };
+  errors: { [Key in string]: string };
 };
