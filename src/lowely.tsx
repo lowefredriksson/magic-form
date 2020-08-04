@@ -4,6 +4,7 @@ import React, {
   useContext,
   useState,
   useEffect,
+  HTMLProps,
 } from "react";
 
 const useRenderCounter = () => {
@@ -71,10 +72,19 @@ export const Child: React.FC<{
 //     //   return value;
 // }
 
+const useAriaProps = (name: string) => {
+  const error = useError(name);
+  let props: any = {};
+  props["aria-invalid"] = error ? "true" : "false";
+  props["aria-describyBy"] = `${name}_error`;
+  return props;
+};
+
 const useField = (name: string, config: FieldConfig) => {
   const { setValue, setTouched, registerField } = useContext(Context);
   const onChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      console.log("Onchange", event.target.type);
       setValue(name, event.target.value);
     },
     [setValue, name]
@@ -91,27 +101,31 @@ const useField = (name: string, config: FieldConfig) => {
     },
     [name, config, registerField]
   );
+  const ariaProps = useAriaProps(name);
   return {
     name,
     id: `${name}_input`,
     onChange,
     onBlur,
     ref: register,
+    ariaProps,
   };
 };
 
-const Field = ({
-  name,
-  validate,
-}: {
-  name: string;
-  validate?: ValidationResolver;
-}) => {
-  const counter = useRenderCounter();
+const Field: React.FC<
+  {
+    name: string;
+    validate?: ValidationResolver;
+    as?: string;
+  } & HTMLProps<HTMLInputElement>
+> = ({ name, validate, as, ...inputProps }) => {
   const fieldProps = useField(name, {
     validate,
   });
-  return <input {...fieldProps} />;
+  if (as) {
+    return React.createElement(as, { ...inputProps, ...fieldProps });
+  }
+  return <input {...inputProps} {...fieldProps} />;
 };
 
 const ErrorComponent = ({ name }: { name: string }) => {
@@ -144,9 +158,9 @@ type FieldConfig = {
   validate?: ValidationResolver;
 };
 type Field = { ref?: HTMLInputElement | null; config: FieldConfig };
-type Listener = {
+type Listener<T> = {
   id: string;
-  callback: (value: Value) => void;
+  callback: (value: T) => void;
   listenTo: string;
 };
 
@@ -230,8 +244,8 @@ const useTouched = (key: string) => {
   );
 };
 
-const useListeners = () => {
-  const listeners = useRef<Listener[]>([]);
+function useListeners<T>() {
+  const listeners = useRef<Listener<T>[]>([]);
   const registerCallback = useCallback(
     (listenTo: string, id: string, callback: (value: any) => void) => {
       listeners.current = [
@@ -248,26 +262,25 @@ const useListeners = () => {
     [listeners.current]
   );
   return [listeners, registerCallback, unregisterCallback] as const;
-};
+}
 
-const notifyListeners = (
-  listners: React.MutableRefObject<Listener[]>,
+function notifyListeners<T>(
+  listners: React.MutableRefObject<Listener<T>[]>,
   name: string,
   value: any
-) => {
+) {
   listners.current.forEach((listner) => {
     if (listner.listenTo === name) {
       listner.callback(value);
     }
   });
-};
+}
 
 function useForm({
   onSubmit,
 }: {
   onSubmit: (values: Map<string, Value>) => Promise<any>;
 }) {
-  const [_, reRender] = useState("");
   const values = useRef<Map<string, Value>>(new Map());
   const fields = useRef<Map<string, Field>>(new Map());
   const errors = useRef<Map<string, Error>>(new Map());
@@ -303,31 +316,37 @@ function useForm({
   const validateValue = (
     key: string,
     value: Value,
+    values: Map<string, Value>,
     validate: ValidationResolver
   ) => {
+    console.log("validateValue before", key, errors.current);
     const prev = errors.current.get(key);
-    const next = validate(value, values.current);
+    const next = validate(value, values);
+    console.log("prev", prev, "next", next);
     if (next === undefined) {
       errors.current.delete(key);
     } else {
       errors.current.set(key, next);
     }
+    console.log("validateValue after", key, errors.current);
     if (prev !== next) {
       notifyListeners(errorListeners, key, next);
     }
+    return errors;
   };
 
   const validateForm = () => {
-    return values.current.forEach((value, key, map) => {
+    values.current.forEach((value, key, map) => {
       const resolver = fields.current.get(key)?.config.validate;
       if (resolver) {
-        validateValue(key, value, resolver);
+        validateValue(key, value, map, resolver);
       }
     });
   };
 
   const setValue = useCallback(
     (key: string, value: Value) => {
+      console.log("setvalue", key, value);
       const prev = values.current.get(key);
       values.current.set(key, value);
       if (prev !== value) {
@@ -348,6 +367,19 @@ function useForm({
     [touched, notifyListeners, touchedListeners]
   );
 
+  const handleSubmitError = (_errors: Map<string, Error>) => {
+    let hasFocus = false;
+    fields.current.forEach((value, key, map) => {
+      if (hasFocus) {
+        return;
+      }
+      if (_errors.has(key)) {
+        hasFocus = true;
+        value.ref?.focus();
+      }
+    });
+  };
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // set all fields touched
@@ -356,29 +388,23 @@ function useForm({
     });
     // run validation
     validateForm();
-    onSubmit(values.current).then(() => {
-      console.log("submitted");
-      touched.current.clear();
-      errors.current.clear();
-      values.current.clear();
-      reRender("");
-    });
-
-    // : if error :
-
-    // focus first error field
-
-    // : else :
-
-    // set is validating ref false
-    // set is submiting ref true
-    // call user onSumbit
-    // set is submitting ref false
-
-    // : if error :
-    // set submitError ref
-
-    // : else :
+    if (errors.current.size > 0) {
+      console.log("error", errors.current);
+      handleSubmitError(errors.current);
+      return;
+    } else {
+      onSubmit(values.current).then(() => {
+        console.log("submitted");
+        touched.current.clear();
+        values.current.clear();
+        touchedListeners.current.forEach((value, index, array) => {
+          value.callback(false);
+        });
+        valueListeners.current.forEach((value, index, array) => {
+          value.callback(undefined);
+        });
+      });
+    }
 
     console.log("onSubmit");
   };
@@ -447,26 +473,36 @@ export const Lowely = () => {
           }}
           onSubmit={handleSubmit}
         >
-          <Field
-            name="password"
-            validate={(value: Value) =>
-              (value as string).length < 4
-                ? "Should be at least 4 characters"
-                : undefined
-            }
-          />
-          <ErrorComponent name="password" />
-          <Field
-            name="confirm password"
-            validate={(value: Value, values) =>
-              (value as string).length < 4
-                ? "Should be at least 4 characters"
-                : value !== values.get("password")
-                ? "Should match password"
-                : undefined
-            }
-          />
-          <ErrorComponent name="confirm password" />
+          <Field name="username" />
+          <fieldset>
+            <Field
+              type="password"
+              name="password"
+              validate={(value: Value) =>
+                (value as string).length < 4
+                  ? "Should be at least 4 characters"
+                  : undefined
+              }
+            />
+            <ErrorComponent name="password" />
+            <Field
+              type="password"
+              name="confirm password"
+              validate={(value: Value, values) =>
+                (value as string).length < 4
+                  ? "Should be at least 4 characters"
+                  : value !== values.get("password")
+                  ? "Should match password"
+                  : undefined
+              }
+            />
+            <ErrorComponent name="confirm password" />
+          </fieldset>
+          <Field as="select" name="colour">
+            <option value="red" label="red" />
+            <option value="blue" label="blue" />
+          </Field>
+          <Field type="checkbox" name="isCompany" />
           <input type="submit" value="Submit" />
         </form>
       </Context.Provider>
