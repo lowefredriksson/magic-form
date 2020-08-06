@@ -1,24 +1,41 @@
-import { ErrorType } from "./Error";
-
-export type FieldOptions = {
-  validate?: (
-    value: string,
-    fields: {
-      [Key: string]: any;
-    }
-  ) => Promise<ErrorType>;
-  required?: boolean;
+export type Error = string;
+export type Value = number | string;
+export type ValidationResolver =
+  | ((value: Value, values: Map<string, Value>) => string | undefined)
+  | ((value: Value, values: Map<string, Value>) => Promise<string | undefined>);
+export type FieldConfig = {
+  validate?: ValidationResolver;
+};
+export type FieldEntry = { ref?: FieldRef | null; config: FieldConfig };
+export type FieldRef = HTMLInputElement | HTMLSelectElement;
+export type Listener<T> = {
+  id: string;
+  callback: (value: T) => void;
+  listenTo: string;
 };
 
-export type FieldRef = HTMLInputElement | HTMLSelectElement;
+export type RegisterListener<T> = (
+  name: string,
+  id: string,
+  callback: (value: T) => void
+) => void;
 
-export type FieldsRefValue = { [Key in string]: { ref: FieldRef, meta: { touched: boolean, error?: ErrorType | null }, options: FieldOptions } }
-
-export type FormContextType = {
-  fields: FieldsRefValue;
-  register: (ref: FieldRef, options?: FieldOptions) => void;
-  setTouched: (name: string) => void;
-  setError: (name: string, error: string) => void;
-  touched: { [Key in string]: boolean };
-  errors: { [Key in string]: string };
+export type UnregisterListener = (id: string) => void;
+export type ContextType = {
+  registerValueListener: RegisterListener<Value>;
+  unregisterValueListener: UnregisterListener;
+  registerErrorListener: RegisterListener<Error>;
+  unregisterErrorListener: UnregisterListener;
+  registerTouchedListener: RegisterListener<boolean>;
+  unregisterTouchedListener: UnregisterListener;
+  registerField: (
+    ref: FieldRef | null,
+    key: string,
+    config: FieldConfig
+  ) => void;
+  getError: (name: string) => string | undefined;
+  setTouched: (key: string, isTouched?: boolean) => void;
+  getTouched: (key: string) => boolean | undefined;
+  setValue: (key: string, value: Value) => void;
+  getValue: (key: string) => Value | undefined;
 };
