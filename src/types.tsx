@@ -7,7 +7,10 @@ export type FieldConfig = {
   validate?: ValidationResolver;
 };
 export type FieldEntry = { ref?: FieldRef | null; config: FieldConfig };
-export type FieldRef = HTMLInputElement | HTMLSelectElement;
+export type FieldRef =
+  | HTMLInputElement
+  | HTMLSelectElement
+  | HTMLTextAreaElement;
 export type Listener<T> = {
   id: string;
   callback: (value: T) => void;

@@ -21,11 +21,13 @@ export const Field: React.FC<
   const fieldProps = useFieldProps(name, {
     validate,
   });
-
+  const props = { ...inputProps, ...fieldProps };
   if (as) {
-    return React.createElement(as, { ...inputProps, ...fieldProps });
+    return React.isValidElement(as)
+      ? React.cloneElement(as, props)
+      : React.createElement(as, props);
   }
-  return <input {...inputProps} {...fieldProps} />;
+  return <input {...props} />;
 };
 
 const ErrorComponent = ({ name }: { name: string }) => {
