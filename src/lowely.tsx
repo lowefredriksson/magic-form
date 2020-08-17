@@ -1,65 +1,21 @@
-import React, { useRef, HTMLProps } from "react";
-import { useFieldProps } from "./useFieldProps";
-import { useError, useTouched } from "./useListener";
-import { ValidationResolver, FieldRef, Value } from "./types";
+import React, { useState } from "react";
+import { Value } from "./types";
 import { useForm } from "./useForm";
 import { Context } from "./Context";
-
-export const useRenderCounter = () => {
-  const counter = useRef(0);
-  counter.current++;
-  return counter.current;
-};
-
-export const Field: React.FC<
-  {
-    name: string;
-    validate?: ValidationResolver;
-    as?: string;
-  } & HTMLProps<FieldRef>
-> = ({ name, validate, as, ...inputProps }) => {
-  const fieldProps = useFieldProps(name, {
-    validate,
-  });
-  const props = { ...inputProps, ...fieldProps };
-  if (as) {
-    return React.isValidElement(as)
-      ? React.cloneElement(as, props)
-      : React.createElement(as, props);
-  }
-  return <input {...props} />;
-};
-
-const ErrorComponent = ({ name }: { name: string }) => {
-  const count = useRenderCounter();
-  const error = useError(name);
-  const touched = useTouched(name);
-  return (
-    <div
-      style={{
-        padding: "5px",
-        borderRadius: "10px",
-        borderColor: "black",
-        borderWidth: 1,
-        borderStyle: "solid",
-      }}
-    >
-      <p>Renders {count}</p>
-      {error && touched ? (
-        <p aria-live="assertive" role="alert" aria-atomic="true">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  );
-};
+import { ErrorComponent } from "./ErrorComponent";
+import { Field } from "./Field";
+import { useRenderCounter } from "./useRenderCounter";
+import { useFieldProps } from "./useFieldProps";
 
 export const Lowely = () => {
+  const [a, setA] = useState(true);
   const { handleSubmit, ...formBag } = useForm({
     onSubmit: () => {
+      setA(false);
       return Promise.resolve(true);
     },
   });
+  const emailFieldProps = useFieldProps("email", {}, formBag);
   const count = useRenderCounter();
   return (
     <div
@@ -82,40 +38,44 @@ export const Lowely = () => {
           }}
           onSubmit={handleSubmit}
         >
-          <Field name="email" type="email" />
-          <fieldset>
-            <Field
-              type="password"
-              name="password"
-              //cleanup on unregister
-              validate={(value: Value) =>
-                (value as string).length < 4
-                  ? "Should be at least 4 characters"
-                  : undefined
-              }
-            />
-            <ErrorComponent name="password" />
-            <Field
-              type="password"
-              name="confirm password"
-              validate={async (value: Value, values) =>
-                Promise.resolve(
-                  (value as string).length < 4
-                    ? "Should be at least 4 characters"
-                    : value !== values.get("password")
-                    ? "Should match password"
-                    : undefined
-                )
-              }
-            />
-            <ErrorComponent name="confirm password" />
-          </fieldset>
-          <Field as="select" name="colour">
-            <option value="red" label="red" />
-            <option value="blue" label="blue" />
-          </Field>
-          <Field type="checkbox" name="isCompany" />
-          <input type="submit" value="Sign up" />
+          {a ? (
+            <>
+              <Field {...emailFieldProps} />
+              <fieldset>
+                <Field
+                  type="password"
+                  name="password"
+                  //cleanup on unregister option
+                  validate={(value: Value) =>
+                    (value as string).length < 4
+                      ? "Should be at least 4 characters"
+                      : undefined
+                  }
+                />
+                <ErrorComponent name="password" />
+                <Field
+                  type="password"
+                  name="confirm password"
+                  validate={async (value: Value, values) =>
+                    Promise.resolve(
+                      (value as string).length < 4
+                        ? "Should be at least 4 characters"
+                        : value !== values.get("password")
+                        ? "Should match password"
+                        : undefined
+                    )
+                  }
+                />
+                <ErrorComponent name="confirm password" />
+              </fieldset>
+              <Field as="select" name="colour">
+                <option value="red" label="red" />
+                <option value="blue" label="blue" />
+              </Field>
+              <Field type="checkbox" name="isCompany" />
+              <input type="submit" value="Sign up" />
+            </>
+          ) : null}
         </form>
       </Context.Provider>
       Renders {count}

@@ -1,5 +1,6 @@
 import React, { useRef, useCallback } from "react";
-import { useListeners, notifyListeners } from "./useListener";
+import { useMapSubject } from "./useSubject";
+import { notifyObservers } from "./notifyObservers";
 import {
   ValidationResolver,
   FieldRef,
@@ -7,17 +8,19 @@ import {
   FieldEntry,
   Error,
   FieldConfig,
-  Listener,
+  Observer,
 } from "./types";
+import { focusFirstError } from "./focusFirstError";
+
 export function useForm({
   onSubmit,
+  removeStateOnUnregister = true,
 }: {
   onSubmit: (values: Map<string, Value>) => Promise<any>;
+  removeStateOnUnregister: boolean;
 }) {
-  const values = useRef<Map<string, Value>>(new Map());
+  // The fields that currently are mounted in the form context.
   const fields = useRef<Map<string, FieldEntry>>(new Map());
-  const errors = useRef<Map<string, Error>>(new Map());
-  const touched = useRef<Set<string>>(new Set());
   const registerField = useCallback(
     (ref: FieldRef | null, key: string, config: FieldConfig = {}) => {
       fields.current.set(key, { ref, config });
@@ -26,25 +29,19 @@ export function useForm({
   );
   const unregisterField = (key: string) => {
     fields.current.delete(key);
-    values.current.delete(key);
-    touched.current.delete(key);
-    errors.current.delete(key);
+    if (removeStateOnUnregister) {
+      valueSubject.state.current.delete(key);
+      touchedSubject.state.current.delete(key);
+      errorSubject.state.current.delete(key);
+    }
   };
-  const [
-    errorListeners,
-    registerErrorListener,
-    unregisterErrorListener,
-  ] = useListeners();
-  const [
-    valueListeners,
-    registerValueListener,
-    unregisterValueListener,
-  ] = useListeners();
-  const [
-    touchedListeners,
-    registerTouchedListener,
-    unregisterTouchedListener,
-  ] = useListeners();
+  const errorSubject = useMapSubject<Error | undefined>({});
+  const valueSubject = useMapSubject<Value>({
+    onChange: () => {
+      validateForm();
+    },
+  });
+  const touchedSubject = useMapSubject<boolean>({});
 
   const validateValue = async (
     key: string,
@@ -52,21 +49,21 @@ export function useForm({
     values: Map<string, Value>,
     validate: ValidationResolver
   ) => {
-    const prev = errors.current.get(key);
+    const prev = errorSubject.state.current.get(key);
     const next = await validate(value, values);
     if (next === undefined) {
-      errors.current.delete(key);
+      errorSubject.state.current.delete(key);
     } else {
-      errors.current.set(key, next);
+      errorSubject.state.current.set(key, next);
     }
     if (prev !== next) {
-      notifyListeners(errorListeners, key, next);
+      notifyObservers<string | undefined>(errorSubject.observers, key, next);
     }
-    return errors;
+    return errorSubject.state;
   };
 
   const validateForm = async () => {
-    values.current.forEach(async (value, key, map) => {
+    valueSubject.state.current.forEach(async (value, key, map) => {
       const resolver = fields.current.get(key)?.config.validate;
       if (resolver) {
         await validateValue(key, value, map, resolver);
@@ -74,53 +71,34 @@ export function useForm({
     });
   };
 
-  const setValue = useCallback(
-    (key: string, value: Value) => {
-      const prev = values.current.get(key);
-      values.current.set(key, value);
-      if (prev !== value) {
-        notifyListeners(valueListeners, key, value);
-        validateForm();
-      }
-      console.log("values", values);
-    },
-    [values, notifyListeners, valueListeners, validateValue]
-  );
-
   const setTouched = useCallback(
     (key: string) => {
-      if (!touched.current.has(key)) {
-        notifyListeners(touchedListeners, key, true);
-      }
-      touched.current.add(key);
+      touchedSubject.setState(key, true);
     },
-    [touched, notifyListeners, touchedListeners]
+    [touchedSubject.state, touchedSubject.observers]
   );
 
   const handleSubmit = onHandleSubmit(
     fields,
-    touched,
+    touchedSubject.state,
     validateForm,
-    errors,
+    errorSubject.state,
     onSubmit,
-    values,
-    touchedListeners
+    valueSubject.state,
+    touchedSubject.observers
   );
 
-  const getValue = (key: string) => values.current.get(key);
-  const getError = (key: string) => errors.current.get(key);
-  const getTouched = (key: string) => touched.current.has(key);
+  const getValue = (key: string) => valueSubject.state.current.get(key);
+  const getError = (key: string) => errorSubject.state.current.get(key);
+  const getTouched = (key: string) => touchedSubject.state.current.has(key);
   return {
     registerField,
     unregisterField,
-    setValue,
-    registerValueListener,
-    unregisterValueListener,
-    registerErrorListener,
-    unregisterErrorListener,
+    setValue: valueSubject.setState,
+    registerValueObserver: valueSubject.registerObserver,
+    registerErrorObserver: errorSubject.registerObserver,
     setTouched,
-    registerTouchedListener,
-    unregisterTouchedListener,
+    registerTouchedObserver: touchedSubject.registerObserver,
     getValue,
     getError,
     getTouched,
@@ -130,12 +108,12 @@ export function useForm({
 
 function onHandleSubmit(
   fields: React.MutableRefObject<Map<string, FieldEntry>>,
-  touched: React.MutableRefObject<Set<string>>,
+  touched: React.MutableRefObject<Map<string, boolean>>,
   validateForm: () => Promise<void>,
-  errors: React.MutableRefObject<Map<string, string>>,
+  errors: React.MutableRefObject<Map<string, Error | undefined>>,
   onSubmit: (values: Map<string, Value>) => Promise<any>,
   values: React.MutableRefObject<Map<string, Value>>,
-  touchedListeners: React.MutableRefObject<Listener<boolean>[]>
+  touchedObservers: React.MutableRefObject<Map<number, Observer<boolean>>>
 ) {
   return async (event: React.FormEvent<HTMLFormElement>) => {
     if (event && event.preventDefault) {
@@ -144,7 +122,7 @@ function onHandleSubmit(
     }
     // set all fields touched
     fields.current.forEach((_, key) => {
-      touched.current.add(key);
+      touched.current.set(key, true);
     });
     // run validation
     await validateForm();
@@ -155,26 +133,10 @@ function onHandleSubmit(
       onSubmit(values.current).then(() => {
         console.log("submitted");
         touched.current.clear();
-        touchedListeners.current.forEach((value, index, array) => {
-          value.callback(false);
+        touchedObservers.current.forEach((value, index, array) => {
+          value.update(false);
         });
       });
     }
   };
-}
-
-function focusFirstError(
-  fields: Map<string, FieldEntry>,
-  errors: Map<string, Error>
-) {
-  let hasFocus = false;
-  fields.forEach((value, key, map) => {
-    if (hasFocus) {
-      return;
-    }
-    if (errors.has(key)) {
-      hasFocus = true;
-      value.ref?.focus();
-    }
-  });
 }

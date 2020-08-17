@@ -1,7 +1,7 @@
 import React, { useCallback, useContext } from "react";
 import { Context } from "./Context";
-import { FieldConfig, FieldRef } from "./types";
-import { useError } from "./useListener";
+import { FieldConfig, FieldRef, ContextType } from "./types";
+import { useError } from "./useError";
 
 const getErrorId = (name: string) => `${name}_error`;
 
@@ -86,8 +86,13 @@ const getFieldValue = (target: FieldRef & EventTarget) => {
   return target.value;
 };
 
-export const useFieldProps = (name: string, config: FieldConfig) => {
-  const { setValue, setTouched, registerField } = useContext(Context);
+export const useFieldProps = (
+  name: string,
+  config: FieldConfig,
+  context?: ContextType
+) => {
+  const _context = useContext(Context);
+  const { setValue, setTouched, registerField } = context || _context;
   const onChange = useCallback(
     (event: React.ChangeEvent<FieldRef>) => {
       setValue(name, getFieldValue(event.target));

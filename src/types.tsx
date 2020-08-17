@@ -5,38 +5,35 @@ export type ValidationResolver =
   | ((value: Value, values: Map<string, Value>) => Promise<string | undefined>);
 export type FieldConfig = {
   validate?: ValidationResolver;
+  removeStateOnUnregister?: boolean;
 };
 export type FieldEntry = { ref?: FieldRef | null; config: FieldConfig };
 export type FieldRef =
   | HTMLInputElement
   | HTMLSelectElement
   | HTMLTextAreaElement;
-export type Listener<T> = {
-  id: string;
-  callback: (value: T) => void;
-  listenTo: string;
+
+export type Observer<T> = {
+  update: (state: T) => void;
+  key: string;
 };
 
-export type RegisterListener<T> = (
-  name: string,
-  id: string,
-  callback: (value: T) => void
-) => void;
+export type UnregisterObserver = () => void;
+export type RegisterObserver<T> = (
+  key: string,
+  update: (state: T) => void
+) => UnregisterObserver;
 
-export type UnregisterListener = (id: string) => void;
 export type ContextType = {
-  registerValueListener: RegisterListener<Value>;
-  unregisterValueListener: UnregisterListener;
-  registerErrorListener: RegisterListener<Error>;
-  unregisterErrorListener: UnregisterListener;
-  registerTouchedListener: RegisterListener<boolean>;
-  unregisterTouchedListener: UnregisterListener;
+  registerValueObserver: RegisterObserver<Value>;
+  registerErrorObserver: RegisterObserver<Error>;
+  registerTouchedObserver: RegisterObserver<boolean>;
   registerField: (
     ref: FieldRef | null,
     key: string,
     config: FieldConfig
   ) => void;
-  getError: (name: string) => string | undefined;
+  getError: (key: string) => string | undefined;
   setTouched: (key: string, isTouched?: boolean) => void;
   getTouched: (key: string) => boolean | undefined;
   setValue: (key: string, value: Value) => void;
