@@ -17,7 +17,7 @@ export function useForm({
   removeStateOnUnregister = true,
 }: {
   onSubmit: (values: Map<string, Value>) => Promise<any>;
-  removeStateOnUnregister: boolean;
+  removeStateOnUnregister?: boolean;
 }) {
   // The fields that currently are mounted in the form context.
   const fields = useRef<Map<string, FieldEntry>>(new Map());

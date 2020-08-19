@@ -1,17 +1,15 @@
-import React, { useState } from "react";
+import React from "react";
 import { Value } from "./types";
 import { useForm } from "./useForm";
-import { Context } from "./Context";
+import { Context } from "./useFormContext";
 import { ErrorComponent } from "./ErrorComponent";
 import { Field } from "./Field";
 import { useRenderCounter } from "./useRenderCounter";
 import { useFieldProps } from "./useFieldProps";
 
 export const Lowely = () => {
-  const [a, setA] = useState(true);
   const { handleSubmit, ...formBag } = useForm({
     onSubmit: () => {
-      setA(false);
       return Promise.resolve(true);
     },
   });
@@ -38,44 +36,40 @@ export const Lowely = () => {
           }}
           onSubmit={handleSubmit}
         >
-          {a ? (
-            <>
-              <Field {...emailFieldProps} />
-              <fieldset>
-                <Field
-                  type="password"
-                  name="password"
-                  //cleanup on unregister option
-                  validate={(value: Value) =>
-                    (value as string).length < 4
-                      ? "Should be at least 4 characters"
-                      : undefined
-                  }
-                />
-                <ErrorComponent name="password" />
-                <Field
-                  type="password"
-                  name="confirm password"
-                  validate={async (value: Value, values) =>
-                    Promise.resolve(
-                      (value as string).length < 4
-                        ? "Should be at least 4 characters"
-                        : value !== values.get("password")
-                        ? "Should match password"
-                        : undefined
-                    )
-                  }
-                />
-                <ErrorComponent name="confirm password" />
-              </fieldset>
-              <Field as="select" name="colour">
-                <option value="red" label="red" />
-                <option value="blue" label="blue" />
-              </Field>
-              <Field type="checkbox" name="isCompany" />
-              <input type="submit" value="Sign up" />
-            </>
-          ) : null}
+          <Field {...emailFieldProps} />
+          <fieldset>
+            <Field
+              type="password"
+              name="password"
+              //cleanup on unregister option
+              validate={(value: Value) =>
+                (value as string).length < 4
+                  ? "Should be at least 4 characters"
+                  : undefined
+              }
+            />
+            <ErrorComponent name="password" />
+            <Field
+              type="password"
+              name="confirm password"
+              validate={async (value: Value, values) =>
+                Promise.resolve(
+                  (value as string).length < 4
+                    ? "Should be at least 4 characters"
+                    : value !== values.get("password")
+                    ? "Should match password"
+                    : undefined
+                )
+              }
+            />
+            <ErrorComponent name="confirm password" />
+          </fieldset>
+          <Field as="select" name="colour">
+            <option value="red" label="red" />
+            <option value="blue" label="blue" />
+          </Field>
+          <Field type="checkbox" name="isCompany" />
+          <input type="submit" value="Sign up" />
         </form>
       </Context.Provider>
       Renders {count}

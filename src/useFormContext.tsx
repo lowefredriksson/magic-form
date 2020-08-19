@@ -12,3 +12,5 @@ export const Context = React.createContext<ContextType>({
   setValue: () => {},
   getValue: () => undefined,
 });
+
+export const useFormContext = () => React.useContext(Context);

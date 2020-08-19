@@ -1,5 +1,5 @@
-import React, { useCallback, useContext } from "react";
-import { Context } from "./Context";
+import React, { useCallback } from "react";
+import { useFormContext } from "./useFormContext";
 import { FieldConfig, FieldRef, ContextType } from "./types";
 import { useError } from "./useError";
 
@@ -91,7 +91,7 @@ export const useFieldProps = (
   config: FieldConfig,
   context?: ContextType
 ) => {
-  const _context = useContext(Context);
+  const _context = useFormContext();
   const { setValue, setTouched, registerField } = context || _context;
   const onChange = useCallback(
     (event: React.ChangeEvent<FieldRef>) => {
