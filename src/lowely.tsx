@@ -7,6 +7,10 @@ import { Field } from "./Field";
 import { useRenderCounter } from "./useRenderCounter";
 import { useFieldProps } from "./useFieldProps";
 
+const shouldBeAtLeast = (c: number, value: string) => {
+  return value.length < c ? "Should be at least 4 characters" : undefined;
+};
+
 export const Lowely = () => {
   const { handleSubmit, ...formBag } = useForm({
     onSubmit: () => {
@@ -41,7 +45,6 @@ export const Lowely = () => {
             <Field
               type="password"
               name="password"
-              //cleanup on unregister option
               validate={(value: Value) =>
                 (value as string).length < 4
                   ? "Should be at least 4 characters"
@@ -52,15 +55,15 @@ export const Lowely = () => {
             <Field
               type="password"
               name="confirm password"
-              validate={async (value: Value, values) =>
-                Promise.resolve(
-                  (value as string).length < 4
-                    ? "Should be at least 4 characters"
-                    : value !== values.get("password")
-                    ? "Should match password"
-                    : undefined
-                )
-              }
+              validate={(value: Value, values) => {
+                if ((value as string).length < 4) {
+                  return "Should be at least 4 characters";
+                }
+                if (value !== values.get("password")) {
+                  return "Should match password";
+                }
+                return undefined;
+              }}
             />
             <ErrorComponent name="confirm password" />
           </fieldset>
