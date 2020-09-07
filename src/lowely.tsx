@@ -40,7 +40,7 @@ export const Lowely = () => {
           }}
           onSubmit={handleSubmit}
         >
-          <Field {...emailFieldProps} />
+          <input {...emailFieldProps} />
           <fieldset>
             <Field
               type="password"
