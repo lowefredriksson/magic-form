@@ -5,10 +5,10 @@ import { useError } from "./useError";
 
 const getErrorId = (name: string) => `${name}_error`;
 
-const useTitleProps = (name: string) => {
+export const useLabelProps = (name: string) => {
   const error = useError(name);
   return {
-    htmlFor: name,
+    htmlFor: `${name}_input`,
   };
 };
 

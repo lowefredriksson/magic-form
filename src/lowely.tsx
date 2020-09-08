@@ -3,7 +3,7 @@ import { Value } from "./types";
 import { useForm } from "./useForm";
 import { Context } from "./useFormContext";
 import { ErrorComponent } from "./ErrorComponent";
-import { Field } from "./Field";
+import { Field, Field2 } from "./Field";
 import { useRenderCounter } from "./useRenderCounter";
 import { useFieldProps } from "./useFieldProps";
 
@@ -17,7 +17,7 @@ export const Lowely = () => {
       return Promise.resolve(true);
     },
   });
-  const emailFieldProps = useFieldProps("email", {}, formBag);
+  // const emailFieldProps = useFieldProps("email", {}, formBag);
   const count = useRenderCounter();
   return (
     <div
@@ -40,7 +40,8 @@ export const Lowely = () => {
           }}
           onSubmit={handleSubmit}
         >
-          <input {...emailFieldProps} />
+          <Field2 name="Email" />
+          {/* <input {...emailFieldProps} /> */}
           <fieldset>
             <Field
               type="password"
