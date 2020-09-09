@@ -2,10 +2,9 @@ import React from "react";
 import { Value } from "./types";
 import { useForm } from "./useForm";
 import { Context } from "./useFormContext";
-import { ErrorComponent } from "./ErrorComponent";
-import { Field, Field2 } from "./Field";
+import { Error } from "./Error";
+import { Field } from "./Field";
 import { useRenderCounter } from "./useRenderCounter";
-import { useFieldProps } from "./useFieldProps";
 
 const shouldBeAtLeast = (c: number, value: string) => {
   return value.length < c ? "Should be at least 4 characters" : undefined;
@@ -39,9 +38,9 @@ export const Lowely = () => {
           }}
           onSubmit={handleSubmit}
         >
-          <Field2 name="Email" />
+          <Field name="Email" />
           <fieldset>
-            <Field2
+            <Field
               type="password"
               name="password"
               validate={(value: Value) =>
@@ -50,8 +49,8 @@ export const Lowely = () => {
                   : undefined
               }
             />
-            <ErrorComponent name="password" />
-            <Field2
+            <Error name="password" />
+            <Field
               type="password"
               name="confirm password"
               validate={(value: Value, values) => {
@@ -64,13 +63,13 @@ export const Lowely = () => {
                 return undefined;
               }}
             />
-            <ErrorComponent name="confirm password" />
+            <Error name="confirm password" />
           </fieldset>
-          <Field2 as="select" name="colour">
+          <Field as="select" name="colour">
             <option value="red" label="red" />
             <option value="blue" label="blue" />
-          </Field2>
-          <Field2 type="checkbox" name="isCompany" />
+          </Field>
+          <Field type="checkbox" name="isCompany" />
           <input type="submit" value="Sign up" />
         </form>
       </Context.Provider>

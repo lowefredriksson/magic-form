@@ -1,6 +1,6 @@
 import { useRef, useCallback } from "react";
 import { Observer } from "./types";
-import { notifyObservers } from "./notifyObservers";
+import { notifyObservers } from "./utils/notifyObservers";
 
 interface ISubjectConfig<T> {
   onChange?: () => void;

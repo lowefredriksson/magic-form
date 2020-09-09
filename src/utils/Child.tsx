@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from "react";
-import { useRenderCounter } from "./useRenderCounter";
-import { Context } from "./useFormContext";
-import { Value } from "./types";
-import { useValue } from "./useValue";
+import { useRenderCounter } from "../useRenderCounter";
+import { Context } from "../useFormContext";
+import { Value } from "../types";
+import { useValue } from "../useValue";
 
 export const Child: React.FC<{
   name: string;

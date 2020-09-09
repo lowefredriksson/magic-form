@@ -1,4 +1,4 @@
-import { FieldEntry, Error } from "./types";
+import { FieldEntry, Error } from "../types";
 export function focusFirstError(
   fields: Map<string, FieldEntry>,
   errors: Map<string, Error | undefined>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Observer } from "./types";
+import { Observer } from "../types";
 
 export function notifyObservers<T>(
   observers: React.MutableRefObject<Map<number, Observer<T>>>,

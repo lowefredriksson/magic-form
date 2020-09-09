@@ -1,38 +1,27 @@
 import React from "react";
+import { useTouched } from "./useTouched";
+import { useError } from "./useError";
+import { useRenderCounter } from "./useRenderCounter";
 
-export type ErrorType = {
-  message?: string;
-};
-//https://almerosteyn.com/2017/09/aria-live-regions-in-react
-//https://medium.com/@gaurav5430/accessibility-quick-wins-error-messages-with-aria-live-7a622cb606f9
-//https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA18
-//https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA19
-//https://www.w3.org/WAI/WCAG21/Techniques/aria/ARIA21
-// export const Error = ({ error, name }: { error: ErrorType | null, name: string}) => {
-//   return <div id={`${name}_error`} aria-live="assertive" role="alert" aria-atomic="true" >
-//     {error?.message}
-//   </div>
-// }
+/**
+ * The Error component is used to display field errors in an accessible way. 
+ * 
+ * The component is only rerendered if error or touched state of the field is changed. 
+ * 
+ * The Error Component implements the ARIA19 technique to display errors. 
+ * 
+ * 
+ * ARIA19: Using ARIA role=alert or Live Regions to Identify Errors
+ */
 
-// /https://hiddedevries.nl/en/blog/2017-04-04-how-to-make-inline-error-messages-accessible
-
-export const errorEquals = (
-  oldError: ErrorType | null,
-  newError: ErrorType | null
-) => {
-  if (oldError === null && newError === null) {
-    return true;
-  }
-
-  if (oldError === null && newError !== null) {
-    return false;
-  }
-
-  if (oldError !== null && newError === null) {
-    return false;
-  }
-
-  if (oldError!.message !== newError!.message) {
-    return false;
-  }
+export const Error = ({ name }: { name: string }) => {
+  const count = useRenderCounter();
+  const error = useError(name);
+  const touched = useTouched(name);
+  console.log(name, " count", count);
+  return error && touched ? (
+        <p aria-live="assertive" role="alert" aria-atomic="true">
+          {error}
+        </p>
+      ) : null
 };

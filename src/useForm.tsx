@@ -1,6 +1,6 @@
 import React, { useRef, useCallback } from "react";
 import { useMapSubject } from "./useSubject";
-import { notifyObservers } from "./notifyObservers";
+import { notifyObservers } from "./utils/notifyObservers";
 import {
   ValidationResolver,
   FieldRef,
@@ -10,7 +10,7 @@ import {
   FieldConfig,
   Observer,
 } from "./types";
-import { focusFirstError } from "./focusFirstError";
+import { focusFirstError } from "./utils/focusFirstError";
 
 export function useForm({
   onSubmit,
@@ -75,7 +75,7 @@ export function useForm({
     (key: string) => {
       touchedSubject.setState(key, true);
     },
-    [touchedSubject.state, touchedSubject.observers]
+    [touchedSubject]
   );
 
   const handleSubmit = onHandleSubmit(
