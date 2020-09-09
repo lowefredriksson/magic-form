@@ -17,7 +17,6 @@ export const Lowely = () => {
       return Promise.resolve(true);
     },
   });
-  // const emailFieldProps = useFieldProps("email", {}, formBag);
   const count = useRenderCounter();
   return (
     <div
@@ -41,9 +40,8 @@ export const Lowely = () => {
           onSubmit={handleSubmit}
         >
           <Field2 name="Email" />
-          {/* <input {...emailFieldProps} /> */}
           <fieldset>
-            <Field
+            <Field2
               type="password"
               name="password"
               validate={(value: Value) =>
@@ -53,7 +51,7 @@ export const Lowely = () => {
               }
             />
             <ErrorComponent name="password" />
-            <Field
+            <Field2
               type="password"
               name="confirm password"
               validate={(value: Value, values) => {
@@ -68,11 +66,11 @@ export const Lowely = () => {
             />
             <ErrorComponent name="confirm password" />
           </fieldset>
-          <Field as="select" name="colour">
+          <Field2 as="select" name="colour">
             <option value="red" label="red" />
             <option value="blue" label="blue" />
-          </Field>
-          <Field type="checkbox" name="isCompany" />
+          </Field2>
+          <Field2 type="checkbox" name="isCompany" />
           <input type="submit" value="Sign up" />
         </form>
       </Context.Provider>
