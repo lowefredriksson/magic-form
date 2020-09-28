@@ -3,7 +3,11 @@ import { useFormContext } from "./useFormContext";
 import { FieldConfig, FieldRef, ContextType } from "./types";
 import { useError } from "./useError";
 
-const getErrorId = (name: string) => `${name}_error`;
+export const getErrorId = (name: string) => {
+  const id = `${name}_error`;
+  console.log(id);
+  return id;
+};
 
 export const useLabelProps = (name: string) => {
   const error = useError(name);
@@ -26,7 +30,7 @@ const useFieldAriaProps = (name: string) => {
   const error = useError(name);
   return {
     ["aria-invalid"]: error ? "true" : "false",
-    ["aria-describedBy"]: getErrorId(name),
+    ["aria-describedby"]: getErrorId(name),
   };
 };
 
@@ -118,6 +122,6 @@ export const useFieldProps = (
     onChange,
     onBlur,
     ref: register,
-    ariaProps,
+    ...ariaProps,
   };
 };

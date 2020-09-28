@@ -1,6 +1,4 @@
-import React, {
-  HTMLProps,
-} from "react";
+import React, { HTMLProps } from "react";
 import { useFieldProps } from "./useFieldProps";
 import { ValidationResolver, FieldRef } from "./types";
 
@@ -13,7 +11,7 @@ import { ValidationResolver, FieldRef } from "./types";
 
 /* 
 The Field component is used to declare a field in a form.
-According to WCAG 2.1 bla bla an accessible form each form input field should have a label. The Field component implments the H44 technique which is a 
+According to WCAG 2.1 bla bla an accessible form each form input field should have a label. The Field component implements the H44 technique which is a 
 sufficient technique for Success Criteria 1.1.1, 1.3.1 and 4.1.2. If the label is visually present the Success Criteria 3.3.2 is also sufficently satisfied. 
 Hence the form input field and corresponding label have strong cohesion, therefore the library combines the two in the Field component. 
 The Field component applies component composition of a Label component and an Input component. 
@@ -43,7 +41,7 @@ The second parameter is the current state of the form, i.e. the current value of
 // ARIA2: Identifying a required field with the aria-required property?
 
 // ARIA18: Using aria-alertdialog to Identify Errors
-// ARIA21: Using Aria-Invalid to Indicate An Error Field 
+// ARIA21: Using Aria-Invalid to Indicate An Error Field
 // ARIA19: Using ARIA role=alert or Live Regions to Identify Errors
 
 // ARIA1: Using the aria-describedby property to provide a descriptive label for user interface controls?
@@ -65,27 +63,41 @@ type FieldProps = {
     | "select"
     | React.FunctionComponent<{ name: string }>;
   Label?: React.FC<{ labelText: string; htmlFor: string }>;
+  label?: string;
   //labelVisuallyHidden: boolean
-} & HTMLProps<FieldRef>
+} & HTMLProps<FieldRef>;
 
-export const Field: React.FC<FieldProps> = ({ as = "input", Label, name, validate, ...rest }) => {
+export const Field: React.FC<FieldProps> = ({
+  as = "input",
+  Label,
+  label,
+  name,
+  validate,
+  ...rest
+}) => {
   const fieldProps = useFieldProps(name, { validate });
-  const inputFieldProps = { ...rest, ...fieldProps };
+  const inputFieldProps = {
+    ...rest,
+    ...fieldProps,
+  };
+  const labelText = label ? label : name;
   const labelElement = Label ? (
-    <Label labelText={name} htmlFor={`${name}_input`} />
+    <Label labelText={labelText} htmlFor={`${name}_input`} />
   ) : (
-    <label htmlFor={`${name}_input`}>{name}</label>
+    <label htmlFor={`${name}_input`}>{labelText}</label>
   );
   const inputElement = React.isValidElement(as)
     ? React.cloneElement(as, inputFieldProps)
     : React.createElement(as, inputFieldProps);
 
   // H44: Note that the label is positioned after input elements of type="checkbox" and type="radio"
-  if (rest.type === "checkbox" || rest.type === "radio") {
-    return <>
-      {inputElement}
-      {labelElement}
-    </>
+  if (rest.type === "checkbox" || rest.type === "radio") {
+    return (
+      <>
+        {inputElement}
+        {labelElement}
+      </>
+    );
   }
 
   return (
@@ -95,15 +107,6 @@ export const Field: React.FC<FieldProps> = ({ as = "input", Label, name, validat
     </>
   );
 };
-
-// const Submit: React.FC<{}> = () => {
-//   return <input type="submit" />;
-// };
-
-// const Form: React.FC<{}> = ({ children }) => {
-//   const a = useFormContext();
-//   return <form onSubmit={a.}>{children}</form>;
-// };
 
 // React.children.Map would be nice to use instead of context but that would require that all form elements are imidate children of the form? If so would it hidnder any styling approaches?
 
