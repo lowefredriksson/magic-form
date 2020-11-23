@@ -1,6 +1,6 @@
 import { useRef, useCallback } from "react";
-import { Observer } from "./types";
-import { notifyObservers } from "./utils/notifyObservers";
+import { Observer } from "../types";
+import { notifyObservers } from "../utils/notifyObservers";
 
 interface ISubjectConfig<T> {
   onChange?: () => void;
@@ -11,7 +11,7 @@ function defaultEquals<T = any>(prevState: T, newState: T) {
   return prevState !== newState;
 }
 
-function useSubject<T>() {
+export function useSubject<T>() {
   const observers = useRef<Map<number, Observer<T>>>(new Map());
   const nextId = useRef(0);
   const registerObserver = useCallback(
@@ -43,7 +43,7 @@ export function useMapSubject<T>({
         onChange();
       }
     },
-    [state, notifyObservers, observers, stateEquals]
+    [state, observers, stateEquals, onChange]
   );
   return {
     state,

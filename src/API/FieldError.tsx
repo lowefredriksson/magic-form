@@ -1,8 +1,8 @@
-import React from "react";
-import { useTouched } from "./useTouched";
-import { useError } from "./useError";
-import { getErrorId } from "./useFieldProps";
-import { useRenderCounter } from "./useRenderCounter";
+import React, { HTMLProps } from "react";
+import { useTouched } from "../hooks/useTouched";
+import { useError } from "../hooks/useError";
+import { getErrorId } from "../hooks/getErrorId";
+import { useRenderCounter } from "../hooks/useRenderCounter";
 
 /**
  * The Error component is used to display field errors in an accessible way. It implements the ARIA19 technique.
@@ -27,16 +27,36 @@ import { useRenderCounter } from "./useRenderCounter";
  * The intent of this Success Criterion is to make users aware of important changes in content that are not given focus, and to do so in a way that doesn't unnecessarily interrupt their work.
  *
  */
+export type CustomErrorComponent = React.FC<{
+  id: string;
+  role: string;
+  "aria-atomic": "true" | "false";
+  children: string | null;
+}>;
 
-export const Error = ({ name }: { name: string }) => {
+type FieldErrorProps = {
+  name: string;
+  Component?: CustomErrorComponent;
+} & HTMLProps<HTMLSpanElement>;
+
+export const FieldError = ({ name, Component, ...rest }: FieldErrorProps) => {
   const count = useRenderCounter();
   const error = useError(name);
   const touched = useTouched(name);
   console.log(name, " count", count, "touched", touched, "error", error);
+
+  if (Component) {
+    return (
+      <Component id={getErrorId(name)} role="alert" aria-atomic="true">
+        {error && touched ? `${error}` : null}
+      </Component>
+    );
+  }
+
   return (
-    <p id={getErrorId(name)} role="alert" aria-atomic="true">
+    <span {...rest} id={getErrorId(name)} role="alert" aria-atomic="true">
       {error && touched ? `${error}` : null}
-    </p>
+    </span>
   );
 };
 

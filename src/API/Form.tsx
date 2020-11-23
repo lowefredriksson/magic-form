@@ -1,15 +1,9 @@
 import React, { HTMLProps } from "react";
-import { useForm } from "./useForm";
-import { Context } from "./useFormContext";
+import { useForm } from "../hooks/useForm";
+import { Context } from "../hooks/useFormContext";
 
 /**
- *
- *
- *
- *
- *
- *
- * G199: Providing success feedback when data is submitted successfully.
+ *  * G199: Providing success feedback when data is submitted successfully.
  * ------------------------------------------------------------------------
  *
  * The objective of this technique is to reduce the effort required for users to confirm that an action,

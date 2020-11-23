@@ -1,10 +1,124 @@
-import React, { HTMLProps } from "react";
-import { useFieldProps } from "./useFieldProps";
-import { ValidationResolver, FieldRef } from "./types";
+import { chdir } from "process";
+import React, { Children, HTMLProps, LabelHTMLAttributes, useRef } from "react";
+import { useInputControlProps } from "../hooks/useInputControlProps";
+import { ValidationResolver, FieldRef } from "../types";
+import { FieldDescription } from "./FieldDescription";
+import { FieldError } from "./FieldError";
+import { FieldInputControl } from "./FieldInputControl";
+import { FieldLabel } from "./FieldLabel";
 
-// Render prop vs React.cloneElement(props.children, props);
-// https://medium.com/@justynazet/passing-props-to-props-children-using-react-cloneelement-and-render-props-pattern-896da70b24f6
-// https://frontarm.com/james-k-nelson/passing-data-props-children/
+type FieldProps = {
+  name: string;
+  validate?: ValidationResolver;
+  description?: string;
+  as?:
+    | "input"
+    | "textarea"
+    | "select"
+    | React.FunctionComponent<{ name: string }>;
+  Label?: React.FC<{ labelText: string; htmlFor: string }>;
+  label?: string;
+  //labelVisuallyHidden: boolean
+} & HTMLProps<FieldRef>;
+
+export const Field: React.FC<FieldProps> = ({
+  as = "input",
+  Label,
+  label,
+  name,
+  validate,
+  description,
+  ...rest
+}) => {
+  const labelText = label ? label : name;
+  // H44: Note that the label is positioned after input elements of type="checkbox" and type="radio"
+  if (rest.type === "checkbox" || rest.type === "radio") {
+    return (
+      <>
+        <FieldInputControl {...rest} as={as} name={name} validate={validate} />
+        <FieldLabel name={name}>{labelText}</FieldLabel>
+        {description !== undefined ? (
+          <FieldDescription name={name}>{description}</FieldDescription>
+        ) : null}
+        {validate !== undefined ? <FieldError name={name} /> : null}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <FieldLabel name={name}>{labelText}</FieldLabel>
+      {description !== undefined ? (
+        <FieldDescription name={name}>{description}</FieldDescription>
+      ) : null}
+      {validate !== undefined ? <FieldError name={name} /> : null}
+      <FieldInputControl {...rest} as={as} name={name} validate={validate} />
+    </>
+  );
+};
+
+type FieldConfig = {
+  name: string;
+  label: string;
+  validate?: ValidationResolver;
+  as?: "input" | "select" | "textarea";
+  inputControlProps?: HTMLProps<FieldRef>;
+};
+
+export const useField = (config: FieldConfig) => {
+  const fieldProps = useInputControlProps(config.name, {
+    validate: config.validate,
+  });
+  const inputControlProps = {
+    ...config.inputControlProps,
+    ...fieldProps,
+  };
+  const { current: inputControlElement } = useRef(
+    config.as === "select" ? (
+      <select {...inputControlProps} />
+    ) : config.as === "textarea" ? (
+      <textarea {...inputControlProps} />
+    ) : (
+      <input {...inputControlProps} />
+    )
+  );
+  const { current: labelElement } = useRef(
+    <label htmlFor={`${config.name}_input`}>{config.label}</label>
+  );
+  const { current: errorElement } = useRef(<FieldError name={config.name} />);
+  const { current: fieldElement } = useRef(
+    <>
+      {labelElement}
+      {inputControlElement}
+      {errorElement}
+    </>
+  );
+  return [
+    fieldElement,
+    {
+      inputControlElement,
+      InputControl: (props: typeof inputControlElement.props) => (
+        <inputControlElement.type {...inputControlElement.props} {...props} />
+      ),
+      labelElement,
+      errorElement,
+    },
+  ] as [
+    JSX.Element,
+    {
+      InputControl: React.FC;
+      inputControlElement: JSX.Element;
+      labelElement: JSX.Element;
+      errorElement: JSX.Element;
+    }
+  ];
+};
+
+// React.children.Map would be nice to use instead of context but that would require that all form elements are imidate children of the form? If so would it hidnder any styling approaches?
+
+// Write something nice about React.memo and maybe how it relates to Component and PureComponent?
+
+// Write something nice about the behaviour of React.cloneElement, React.createElement, React.isValidElement
 
 // Title, Accessible Title. Use html tags whenever possible
 // GOOD: http://usability.com.au/2008/09/accessible-forms-using-wcag-2-0/
@@ -54,62 +168,7 @@ The second parameter is the current state of the form, i.e. the current value of
 // type HTMLSelectType = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
 // type HTMLTextAreaType = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
 // type InputType = HTMLInputType | HTMLSelectType | HTMLTextAreaType;
-type FieldProps = {
-  name: string;
-  validate?: ValidationResolver;
-  as?:
-    | "input"
-    | "textarea"
-    | "select"
-    | React.FunctionComponent<{ name: string }>;
-  Label?: React.FC<{ labelText: string; htmlFor: string }>;
-  label?: string;
-  //labelVisuallyHidden: boolean
-} & HTMLProps<FieldRef>;
 
-export const Field: React.FC<FieldProps> = ({
-  as = "input",
-  Label,
-  label,
-  name,
-  validate,
-  ...rest
-}) => {
-  const fieldProps = useFieldProps(name, { validate });
-  const inputFieldProps = {
-    ...rest,
-    ...fieldProps,
-  };
-  const labelText = label ? label : name;
-  const labelElement = Label ? (
-    <Label labelText={labelText} htmlFor={`${name}_input`} />
-  ) : (
-    <label htmlFor={`${name}_input`}>{labelText}</label>
-  );
-  const inputElement = React.isValidElement(as)
-    ? React.cloneElement(as, inputFieldProps)
-    : React.createElement(as, inputFieldProps);
-
-  // H44: Note that the label is positioned after input elements of type="checkbox" and type="radio"
-  if (rest.type === "checkbox" || rest.type === "radio") {
-    return (
-      <>
-        {inputElement}
-        {labelElement}
-      </>
-    );
-  }
-
-  return (
-    <>
-      {labelElement}
-      {inputElement}
-    </>
-  );
-};
-
-// React.children.Map would be nice to use instead of context but that would require that all form elements are imidate children of the form? If so would it hidnder any styling approaches?
-
-// Write something nice about React.memo and maybe how it relates to Component and PureComponent?
-
-// Write something nice about the behaviour of React.cloneElement, React.createElement, React.isValidElement
+// Render prop vs React.cloneElement(props.children, props);
+// https://medium.com/@justynazet/passing-props-to-props-children-using-react-cloneelement-and-render-props-pattern-896da70b24f6
+// https://frontarm.com/james-k-nelson/passing-data-props-children/

@@ -28,6 +28,9 @@ export type ContextType = {
   registerValueObserver: RegisterObserver<Value>;
   registerErrorObserver: RegisterObserver<Error>;
   registerTouchedObserver: RegisterObserver<boolean>;
+  registerDescriptionObserver: RegisterObserver<string[]>;
+  addDescription: (field: string, descriptionId: string) => void;
+  removeDescription: (field: string, descriptionId: string) => void;
   registerField: (
     ref: FieldRef | null,
     key: string,

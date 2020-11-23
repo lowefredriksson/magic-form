@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Value } from "../types";
-import { useRenderCounter } from "../useRenderCounter";
+import { useRenderCounter } from "../hooks/useRenderCounter";
 
 const value = new Map<PropertyKey, string>();
 value.set("name", "Lowe");
