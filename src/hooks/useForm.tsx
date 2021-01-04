@@ -2,7 +2,7 @@ import React, { useRef, useCallback } from "react";
 import { useMapSubject } from "./useSubject";
 import { notifyObservers } from "../utils/notifyObservers";
 import {
-  ValidationResolver,
+  ErrorResolver,
   FieldRef,
   Value,
   FieldEntry,
@@ -58,7 +58,7 @@ export function useForm({
       key: string,
       value: Value,
       values: Map<string, Value>,
-      validate: ValidationResolver
+      validate: ErrorResolver
     ) => {
       const prev = errorSubject.state.current.get(key);
       const next = await validate(value, values);

@@ -8,6 +8,7 @@ import { useValue } from "./hooks/useValue";
 import { FieldLabel } from "./API/FieldLabel";
 import { FieldInputControl } from "./API/FieldInputControl";
 import { FieldDescription } from "./API/FieldDescription";
+import { AlertCircle } from "react-feather";
 
 const CustomLabel = ({
   htmlFor,
@@ -37,7 +38,7 @@ const RadioGroup = () => {
 export const Lowely2 = () => {
   const [error, setError] = useState<string | null>(null);
   return (
-    <form>
+    <form style={{ flexDirection: "column", display: "flex" }}>
       <fieldset>
         <legend>Cars</legend>
         <input
@@ -286,18 +287,128 @@ export const Lowely6 = () => {
   );
 };
 
-export const Lowely = () => {
+export function Lowely() {
   return (
-    <Form>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "flex-start",
+      }}
+    >
+      <Lowely1></Lowely1>
+      <div style={{ width: 20 }}></div>
+      <Lowely22></Lowely22>
+    </div>
+  );
+}
+
+export const Lowely22 = () => {
+  return (
+    <Form
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        margin: "40px",
+        maxWidth: "400px",
+      }}
+    >
+      <div style={{ position: "absolute", right: 0, top: 0 }}>( 1 )</div>
+      <h1>Register</h1>
+      <div
+        style={{
+          marginBottom: "15px",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Field
+          label="Username"
+          description="Your username is visible to everyone and can only be set once"
+          required
+          name="username"
+        />
+      </div>
       <Field
-        label="Username"
-        description="This is the email associated with your account"
-        required
-        name="username"
+        label="Password"
+        name="password"
+        type="password"
+        validate={() => "Password should contain at least 8 characters"}
       />
-      <Field label="Password" required name="password" />
-      <Field name="rememberUser" type="checkbox" label="Remember me" />
-      <button type="submit">Submit</button>
+      <button
+        type="submit"
+        style={{
+          fontSize: 15,
+          backgroundColor: "black",
+          color: "white",
+          borderWidth: 0,
+          marginTop: 20,
+          padding: 10,
+        }}
+      >
+        Submit
+      </button>
+    </Form>
+  );
+};
+
+export const Lowely1 = () => {
+  return (
+    <Form
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        margin: "40px",
+        maxWidth: "400px",
+      }}
+    >
+      <div style={{ position: "absolute", right: 0, top: 0 }}>( 1 )</div>
+      <h1>Register</h1>
+      <div
+        style={{
+          flexDirection: "row",
+          display: "flex",
+          position: "relative",
+          marginBottom: 20,
+        }}
+      >
+        <div style={{ position: "absolute", right: -40, top: 10 }}>( 6 )</div>
+        <AlertCircle size={30} color="red" />
+        <h4 style={{ margin: 0, marginLeft: 10 }}>
+          Registration failed. There seems to be a problem with your internet
+          connection.
+        </h4>
+      </div>
+      <div
+        style={{
+          marginBottom: "15px",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Field
+          label="Username"
+          description="Your username is visible to everyone and can only be set once"
+          required
+          name="username"
+        />
+      </div>
+      <Field label="Password" name="password" type="password" />
+      <button
+        type="submit"
+        style={{
+          fontSize: 15,
+          backgroundColor: "black",
+          color: "white",
+          borderWidth: 0,
+          marginTop: 20,
+          padding: 10,
+        }}
+      >
+        Submit
+      </button>
     </Form>
   );
 };

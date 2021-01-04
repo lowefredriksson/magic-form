@@ -3,6 +3,7 @@ import { useTouched } from "../hooks/useTouched";
 import { useError } from "../hooks/useError";
 import { getErrorId } from "../hooks/getErrorId";
 import { useRenderCounter } from "../hooks/useRenderCounter";
+import { AlertCircle } from "react-feather";
 
 /**
  * The Error component is used to display field errors in an accessible way. It implements the ARIA19 technique.
@@ -54,8 +55,28 @@ export const FieldError = ({ name, Component, ...rest }: FieldErrorProps) => {
   }
 
   return (
-    <span {...rest} id={getErrorId(name)} role="alert" aria-atomic="true">
-      {error && touched ? `${error}` : null}
+    <span
+      {...rest}
+      id={getErrorId(name)}
+      role="alert"
+      aria-atomic="true"
+      style={{
+        marginTop: "3px",
+        flexDirection: "row",
+        display: "flex",
+        alignItems: "center",
+        position: "relative",
+      }}
+    >
+      {error && touched ? (
+        <>
+          <AlertCircle size={14} color="red" style={{ marginRight: "3px" }} />
+          {error}
+        </>
+      ) : null}
+      {error && touched ? (
+        <div style={{ position: "absolute", right: -40, top: 0 }}>( 4 )</div>
+      ) : null}
     </span>
   );
 };

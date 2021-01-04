@@ -1,7 +1,6 @@
-import { chdir } from "process";
-import React, { Children, HTMLProps, LabelHTMLAttributes, useRef } from "react";
+import React, { HTMLProps, useRef } from "react";
 import { useInputControlProps } from "../hooks/useInputControlProps";
-import { ValidationResolver, FieldRef } from "../types";
+import { ErrorResolver, FieldRef } from "../types";
 import { FieldDescription } from "./FieldDescription";
 import { FieldError } from "./FieldError";
 import { FieldInputControl } from "./FieldInputControl";
@@ -9,21 +8,19 @@ import { FieldLabel } from "./FieldLabel";
 
 type FieldProps = {
   name: string;
-  validate?: ValidationResolver;
-  description?: string;
+  validate?: ErrorResolver;
   as?:
     | "input"
     | "textarea"
     | "select"
     | React.FunctionComponent<{ name: string }>;
-  Label?: React.FC<{ labelText: string; htmlFor: string }>;
   label?: string;
+  description?: string;
   //labelVisuallyHidden: boolean
 } & HTMLProps<FieldRef>;
 
 export const Field: React.FC<FieldProps> = ({
   as = "input",
-  Label,
   label,
   name,
   validate,
@@ -47,12 +44,61 @@ export const Field: React.FC<FieldProps> = ({
 
   return (
     <>
-      <FieldLabel name={name}>{labelText}</FieldLabel>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          position: "relative",
+        }}
+      >
+        <FieldLabel name={name} style={{ fontWeight: "bold" }}>
+          {labelText}
+        </FieldLabel>
+        <div style={{ marginLeft: 10 }}>( 2 )</div>
+      </div>
       {description !== undefined ? (
-        <FieldDescription name={name}>{description}</FieldDescription>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "stretch",
+            flexDirection: "column",
+            position: "relative",
+          }}
+        >
+          <div style={{ position: "absolute", right: -40 }}>( 3 )</div>
+          <FieldDescription name={name}>{description}</FieldDescription>
+        </div>
       ) : null}
-      {validate !== undefined ? <FieldError name={name} /> : null}
-      <FieldInputControl {...rest} as={as} name={name} validate={validate} />
+      {validate !== undefined ? (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "stretch",
+            flexDirection: "column",
+            position: "relative",
+          }}
+        >
+          <div style={{ position: "absolute", right: -40 }}></div>
+          <FieldError name={name} />
+        </div>
+      ) : null}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "stretch",
+          flexDirection: "column",
+          position: "relative",
+        }}
+      >
+        <div style={{ position: "absolute", right: -40, top: 4 }}>( 5 )</div>
+        <FieldInputControl
+          {...rest}
+          as={as}
+          name={name}
+          validate={validate}
+          style={{ marginTop: 5 }}
+        />
+      </div>
     </>
   );
 };
@@ -60,7 +106,7 @@ export const Field: React.FC<FieldProps> = ({
 type FieldConfig = {
   name: string;
   label: string;
-  validate?: ValidationResolver;
+  validate?: ErrorResolver;
   as?: "input" | "select" | "textarea";
   inputControlProps?: HTMLProps<FieldRef>;
 };

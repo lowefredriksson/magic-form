@@ -1,10 +1,10 @@
 export type Error = string;
 export type Value = number | string;
-export type ValidationResolver =
+export type ErrorResolver =
   | ((value: Value, values: Map<string, Value>) => string | undefined)
   | ((value: Value, values: Map<string, Value>) => Promise<string | undefined>);
 export type FieldConfig = {
-  validate?: ValidationResolver;
+  validate?: ErrorResolver;
   removeStateOnUnregister?: boolean;
 };
 export type FieldEntry = { ref?: FieldRef | null; config: FieldConfig };

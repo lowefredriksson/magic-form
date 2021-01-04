@@ -1,6 +1,6 @@
 import React, { HTMLProps, useMemo } from "react";
 import { useInputControlProps } from "../hooks/useInputControlProps";
-import { ValidationResolver, FieldRef } from "../types";
+import { ErrorResolver, FieldRef } from "../types";
 
 type FieldInputControlProps = {
   name: string;
@@ -9,7 +9,7 @@ type FieldInputControlProps = {
     | "textarea"
     | "input"
     | React.FunctionComponent<{ name: string }>;
-  validate?: ValidationResolver;
+  validate?: ErrorResolver;
 } & HTMLProps<FieldRef>;
 
 export const FieldInputControl = ({
