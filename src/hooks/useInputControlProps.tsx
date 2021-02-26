@@ -73,7 +73,7 @@ export const useInputControlProps = (
     [name, config, registerField]
   );
   const ariaDescribedBy = useMemo(() => {
-    if ((describedBy?.length ?? 0) > 0) {
+    if (describedBy && (describedBy.length ?? 0) > 0) {
       return [getErrorId(name), ...describedBy].join(" ");
     }
     return getErrorId(name);
