@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Value } from "./types";
 import { FieldError } from "./API/FieldError";
-import { Field, useField } from "./API/Field";
+import { Field } from "./API/Field";
+import { useField } from "./hooks/useField";
 import { useRenderCounter } from "./hooks/useRenderCounter";
 import { Form } from "./API/Form";
 import { useValue } from "./hooks/useValue";
