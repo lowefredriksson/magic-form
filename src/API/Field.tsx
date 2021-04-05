@@ -5,7 +5,7 @@ import { FieldError } from "./FieldError";
 import { FieldInputControl } from "./FieldInputControl";
 import { FieldLabel } from "./FieldLabel";
 
-type FieldProps = {
+export type FieldProps = {
   name: string;
   validate?: ErrorResolver;
   as?:
@@ -15,7 +15,6 @@ type FieldProps = {
     | React.FunctionComponent<{ name: string }>;
   label?: string;
   description?: string;
-  //labelVisuallyHidden: boolean
 } & HTMLProps<FieldRef>;
 
 export const Field: React.FC<FieldProps> = ({
@@ -43,61 +42,20 @@ export const Field: React.FC<FieldProps> = ({
 
   return (
     <>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          position: "relative",
-        }}
-      >
-        <FieldLabel name={name} style={{ fontWeight: "bold" }}>
-          {labelText}
-        </FieldLabel>
-        <div style={{ marginLeft: 10 }}>( 2 )</div>
-      </div>
+      <FieldLabel name={name} style={{ fontWeight: "bold" }}>
+        {labelText}
+      </FieldLabel>
       {description !== undefined ? (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "stretch",
-            flexDirection: "column",
-            position: "relative",
-          }}
-        >
-          <div style={{ position: "absolute", right: -40 }}>( 3 )</div>
-          <FieldDescription name={name}>{description}</FieldDescription>
-        </div>
+        <FieldDescription name={name}>{description}</FieldDescription>
       ) : null}
-      {validate !== undefined ? (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "stretch",
-            flexDirection: "column",
-            position: "relative",
-          }}
-        >
-          <div style={{ position: "absolute", right: -40 }}></div>
-          <FieldError name={name} />
-        </div>
-      ) : null}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "stretch",
-          flexDirection: "column",
-          position: "relative",
-        }}
-      >
-        <div style={{ position: "absolute", right: -40, top: 4 }}>( 5 )</div>
-        <FieldInputControl
-          {...rest}
-          as={as}
-          name={name}
-          validate={validate}
-          style={{ marginTop: 5 }}
-        />
-      </div>
+      {validate !== undefined ? <FieldError name={name} /> : null}
+      <FieldInputControl
+        {...rest}
+        as={as}
+        name={name}
+        validate={validate}
+        style={{ marginTop: 5 }}
+      />
     </>
   );
 };

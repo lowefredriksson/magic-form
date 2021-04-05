@@ -8,18 +8,20 @@ import {
   FieldEntry,
   Error,
   FieldConfig,
-  Observer,
 } from "../types";
 import { focusFirstError } from "../utils/focusFirstError";
+
+export type UseFormProps = {
+  onSubmit: (
+    values: Map<string, Value>
+  ) => Promise<{ message: string; status: "success" | "error" }>;
+  removeStateOnUnregister?: boolean;
+};
 
 export function useForm({
   onSubmit,
   removeStateOnUnregister = true,
-}: {
-  onSubmit: (values: Map<string, Value>) => Promise<any>;
-  removeStateOnUnregister?: boolean;
-}) {
-  // The fields that currently are mounted in the form context.
+}: UseFormProps) {
   const fields = useRef<Map<string, FieldEntry>>(new Map());
   const errorSubject = useMapSubject<Error | undefined>({});
   const descriptionSubject = useMapSubject<string[]>({});
@@ -29,6 +31,7 @@ export function useForm({
     },
   });
   const touchedSubject = useMapSubject<boolean>({});
+  const formStatusSubject = useMapSubject<string>({});
   const registerField = useCallback(
     (ref: FieldRef | null, key: string, config: FieldConfig = {}) => {
       fields.current.set(key, { ref, config });
@@ -42,16 +45,17 @@ export function useForm({
         valueSubject.state.current.delete(key);
         touchedSubject.state.current.delete(key);
         errorSubject.state.current.delete(key);
+        formStatusSubject.state.current.delete(key);
       }
     },
     [
       errorSubject.state,
+      formStatusSubject.state,
       removeStateOnUnregister,
       touchedSubject.state,
       valueSubject.state,
     ]
   );
-  //  const submitStatusRef = useRef<{ status: boolean; message: string }>(null);
 
   const validateValue = useCallback(
     async (
@@ -75,14 +79,14 @@ export function useForm({
     [errorSubject.observers, errorSubject.state]
   );
 
-  const validateForm = async () => {
+  const validateForm = useCallback(async () => {
     valueSubject.state.current.forEach(async (value, key, map) => {
       const resolver = fields.current.get(key)?.config.validate;
       if (resolver) {
         await validateValue(key, value, map, resolver);
       }
     });
-  };
+  }, [validateValue, valueSubject.state]);
 
   const setTouched = useCallback(
     (key: string) => {
@@ -112,14 +116,45 @@ export function useForm({
     [descriptionSubject]
   );
 
-  const handleSubmit = onHandleSubmit(
-    fields,
-    touchedSubject.state,
-    validateForm,
-    errorSubject.state,
-    onSubmit,
-    valueSubject.state,
-    touchedSubject.observers
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      if (event && event.preventDefault) {
+        event.preventDefault();
+        event.persist();
+      }
+      // set all fields touched
+      fields.current.forEach((_, key) => {
+        touchedSubject.state.current.set(key, true);
+      });
+      // run validation
+      await validateForm();
+      if (errorSubject.state.current.size > 0) {
+        focusFirstError(fields.current, errorSubject.state.current);
+        return;
+      } else {
+        const res = await onSubmit(valueSubject.state.current);
+        console.log("res", res);
+        formStatusSubject.state.current.clear();
+        formStatusSubject.setState(res.status, res.message);
+        console.log("formStatus state", formStatusSubject.state.current);
+        touchedSubject.state.current.clear();
+        touchedSubject.observers.current.forEach((value, index, array) => {
+          value.update(false);
+        });
+        if (res.status === "success") {
+          return;
+        }
+      }
+    },
+    [
+      errorSubject.state,
+      formStatusSubject,
+      onSubmit,
+      touchedSubject.observers,
+      touchedSubject.state,
+      validateForm,
+      valueSubject.state,
+    ]
   );
 
   const getValue = useCallback(
@@ -134,6 +169,10 @@ export function useForm({
     (key: string) => touchedSubject.state.current.has(key),
     [touchedSubject.state]
   );
+  const getFormStatus = useCallback(
+    (key: string) => formStatusSubject.state.current.get(key),
+    [formStatusSubject.state]
+  );
   return {
     registerField,
     unregisterField,
@@ -145,46 +184,11 @@ export function useForm({
     registerErrorObserver: errorSubject.registerObserver,
     setTouched,
     registerTouchedObserver: touchedSubject.registerObserver,
+    registerFormStatusObserver: formStatusSubject.registerObserver,
     getValue,
     getError,
     getTouched,
+    getFormStatus,
     handleSubmit,
   } as const;
-}
-
-function onHandleSubmit(
-  fields: React.MutableRefObject<Map<string, FieldEntry>>,
-  touched: React.MutableRefObject<Map<string, boolean>>,
-  validateForm: () => Promise<void>,
-  errors: React.MutableRefObject<Map<string, Error | undefined>>,
-  onSubmit: (values: Map<string, Value>) => Promise<any>,
-  values: React.MutableRefObject<Map<string, Value>>,
-  touchedObservers: React.MutableRefObject<Map<number, Observer<boolean>>>
-) {
-  return async (event: React.FormEvent<HTMLFormElement>) => {
-    console.log("handle submit", values);
-    if (event && event.preventDefault) {
-      event.preventDefault();
-      event.persist();
-    }
-    // set all fields touched
-    fields.current.forEach((_, key) => {
-      touched.current.set(key, true);
-    });
-    // run validation
-    await validateForm();
-    if (errors.current.size > 0) {
-      focusFirstError(fields.current, errors.current);
-      return;
-    } else {
-      const res = await onSubmit(values.current);
-      touched.current.clear();
-      touchedObservers.current.forEach((value, index, array) => {
-        value.update(false);
-      });
-      // if (res.status === 200) {
-      // submitStatus
-      // }
-    }
-  };
 }

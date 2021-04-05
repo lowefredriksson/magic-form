@@ -1,5 +1,5 @@
 import React, { HTMLProps } from "react";
-import { useForm } from "../hooks/useForm";
+import { useForm, UseFormProps } from "../hooks/useForm";
 import { Context } from "../hooks/useFormContext";
 
 /**
@@ -22,14 +22,17 @@ import { Context } from "../hooks/useFormContext";
  *
  */
 
-export const Form: React.FC<HTMLProps<HTMLFormElement>> = ({
+type FormProps = Omit<HTMLProps<HTMLFormElement>, "onSubmit"> & UseFormProps;
+
+export const Form: React.FC<FormProps> = ({
   children,
+  onSubmit,
+  removeStateOnUnregister,
   ...formProps
 }) => {
   const { handleSubmit, ...formBag } = useForm({
-    onSubmit: (values) => {
-      return Promise.resolve(true);
-    },
+    onSubmit,
+    removeStateOnUnregister,
   });
 
   return (

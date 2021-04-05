@@ -2,17 +2,8 @@ import React, { useCallback, useMemo } from "react";
 import { useFormContext } from "./useFormContext";
 import { FieldConfig, FieldRef, ContextType } from "../types";
 import { useError } from "./useError";
-import { useObserver } from "./useObserver";
+import { useObservedValue } from "./useObserver";
 import { getErrorId } from "./getErrorId";
-
-// const useErrorAriaProps = (name: string) => {
-//   const error = useError(name);
-//   return {
-//     id: getErrorId(name),
-//     role: "alert",
-//     ["aria-atomic"]: "true",
-//   };
-// };
 
 const getMultipleSelectValue = (
   options: HTMLOptionElement[] | HTMLOptionsCollection
@@ -44,7 +35,7 @@ const getFieldValue = (target: FieldRef & EventTarget) => {
   return target.value;
 };
 
-export const useInputControlProps = (
+export const useInputControl = (
   name: string,
   config: FieldConfig,
   context?: ContextType
@@ -53,7 +44,7 @@ export const useInputControlProps = (
   const { setValue, setTouched, registerField, registerDescriptionObserver } =
     context || _context;
   const error = useError(name);
-  const describedBy = useObserver(name, registerDescriptionObserver);
+  const describedBy = useObservedValue(name, registerDescriptionObserver);
   const onChange = useCallback(
     (event: React.ChangeEvent<FieldRef>) => {
       setValue(name, getFieldValue(event.target));
@@ -88,3 +79,12 @@ export const useInputControlProps = (
     "aria-describedby": ariaDescribedBy,
   };
 };
+
+// const useErrorAriaProps = (name: string) => {
+//   const error = useError(name);
+//   return {
+//     id: getErrorId(name),
+//     role: "alert",
+//     ["aria-atomic"]: "true",
+//   };
+// };

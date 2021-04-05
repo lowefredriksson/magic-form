@@ -28,6 +28,7 @@ export type ContextType = {
   registerValueObserver: RegisterObserver<Value>;
   registerErrorObserver: RegisterObserver<Error>;
   registerTouchedObserver: RegisterObserver<boolean>;
+  registerFormStatusObserver: RegisterObserver<string>;
   registerDescriptionObserver: RegisterObserver<string[]>;
   addDescription: (field: string, descriptionId: string) => void;
   removeDescription: (field: string, descriptionId: string) => void;
@@ -39,6 +40,7 @@ export type ContextType = {
   getError: (key: string) => string | undefined;
   setTouched: (key: string, isTouched?: boolean) => void;
   getTouched: (key: string) => boolean | undefined;
+  getFormStatus: (key: string) => string | undefined;
   setValue: (key: string, value: Value) => void;
   getValue: (key: string) => Value | undefined;
 };

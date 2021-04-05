@@ -1,5 +1,5 @@
 import React, { HTMLProps, useMemo } from "react";
-import { useInputControlProps } from "../hooks/useInputControlProps";
+import { useInputControl } from "../hooks/useInputControl";
 import { ErrorResolver, FieldRef } from "../types";
 
 type FieldInputControlProps = {
@@ -18,7 +18,7 @@ export const FieldInputControl = ({
   validate,
   ...props
 }: FieldInputControlProps) => {
-  const inputProps = useInputControlProps(name, { validate });
+  const inputProps = useInputControl(name, { validate });
   return useMemo(() => {
     const inputControlProps = {
       ...props,

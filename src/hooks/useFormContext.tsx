@@ -7,12 +7,14 @@ export const Context = React.createContext<ContextType>({
   registerErrorObserver: () => () => {},
   registerTouchedObserver: () => () => {},
   registerDescriptionObserver: () => () => {},
+  registerFormStatusObserver: () => () => {},
   addDescription: () => {},
   removeDescription: () => {},
-  getError: () => undefined,
   setTouched: () => {},
-  getTouched: () => false,
   setValue: () => {},
+  getError: () => undefined,
+  getFormStatus: () => undefined,
+  getTouched: () => undefined,
   getValue: () => undefined,
 });
 

@@ -1,5 +1,5 @@
 import React, { HTMLProps, useRef } from "react";
-import { useInputControlProps } from "./useInputControlProps";
+import { useInputControl } from "./useInputControl";
 import { ErrorResolver, FieldRef } from "../types";
 import { FieldError } from "../API/FieldError";
 
@@ -12,7 +12,7 @@ type FieldConfig = {
 };
 
 export const useField = (config: FieldConfig) => {
-  const fieldProps = useInputControlProps(config.name, {
+  const fieldProps = useInputControl(config.name, {
     validate: config.validate,
   });
   const inputControlProps = {

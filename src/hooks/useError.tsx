@@ -1,8 +1,8 @@
 import { useFormContext } from "./useFormContext";
 import { Error } from "../types";
-import { useObserver } from "./useObserver";
+import { useObservedValue } from "./useObserver";
 
 export const useError = (key: string) => {
   const { registerErrorObserver } = useFormContext();
-  return useObserver<Error>(key, registerErrorObserver);
+  return useObservedValue<Error>(key, registerErrorObserver);
 };

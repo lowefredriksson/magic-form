@@ -2,7 +2,6 @@ import React, { HTMLProps } from "react";
 import { useTouched } from "../hooks/useTouched";
 import { useError } from "../hooks/useError";
 import { getErrorId } from "../hooks/getErrorId";
-import { useRenderCounter } from "../hooks/useRenderCounter";
 import { AlertCircle } from "react-feather";
 
 /**
@@ -41,10 +40,8 @@ type FieldErrorProps = {
 } & HTMLProps<HTMLSpanElement>;
 
 export const FieldError = ({ name, Component, ...rest }: FieldErrorProps) => {
-  const count = useRenderCounter();
   const error = useError(name);
   const touched = useTouched(name);
-  console.log(name, " count", count, "touched", touched, "error", error);
 
   if (Component) {
     return (
@@ -68,15 +65,7 @@ export const FieldError = ({ name, Component, ...rest }: FieldErrorProps) => {
         position: "relative",
       }}
     >
-      {error && touched ? (
-        <>
-          <AlertCircle size={14} color="red" style={{ marginRight: "3px" }} />
-          {error}
-        </>
-      ) : null}
-      {error && touched ? (
-        <div style={{ position: "absolute", right: -40, top: 0 }}>( 4 )</div>
-      ) : null}
+      {error && touched ? <>{error}</> : null}
     </span>
   );
 };

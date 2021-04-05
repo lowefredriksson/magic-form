@@ -1,7 +1,7 @@
 import { useFormContext } from "./useFormContext";
-import { useObserver } from "./useObserver";
+import { useObservedValue } from "./useObserver";
 
 export const useTouched = (key: string) => {
   const { registerTouchedObserver } = useFormContext();
-  return useObserver<boolean>(key, registerTouchedObserver);
+  return useObservedValue<boolean>(key, registerTouchedObserver);
 };
