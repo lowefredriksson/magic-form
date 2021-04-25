@@ -28,25 +28,6 @@ export function useObservers<T>() {
   return [observers, registerObserver] as const;
 }
 
-export function useValueSubject<T>({
-  onChange = () => {},
-  stateEquals = defaultEquals,
-}: ISubjectConfig<T>) {
-  const state = useRef<T>();
-  const [observers, registerObserver] = useObservers<T>();
-
-  const setState = useCallback(
-    (value: T) => {
-      const prev = state.current;
-      state.current = value;
-      if (stateEquals(prev, value)) {
-        notifyObservers(observers, "default", value);
-      }
-    },
-    [observers, stateEquals]
-  );
-}
-
 export function useMapSubject<T>({
   onChange = () => {},
   stateEquals = defaultEquals,

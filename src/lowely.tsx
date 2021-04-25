@@ -3,7 +3,8 @@ import { Value } from "./types";
 import { Field } from "./API/Field";
 import { Form } from "./API/Form";
 import { FieldProps } from "./API/Field";
-import { FormStatusError, FormStatusSuccess } from "./API/FormStatus";
+import { FormStatus } from "./API/FormStatus";
+import { FormError } from "./API/FormError";
 
 function CustomField(props: FieldProps) {
   return (
@@ -68,11 +69,11 @@ function validateTermsAndServices(tas: Value) {
   return "Terms and services needs to be accepted before you register";
 }
 
-async function register(credentials: { username: string; password: string }) {
+async function register(values: Map<string, Value>) {
   throw new Error("");
 }
 
-async function onSubmit(values: { username: string; password: string }) {
+async function onSubmit(values: Map<string, Value>) {
   try {
     await register(values);
     return {
@@ -90,24 +91,10 @@ async function onSubmit(values: { username: string; password: string }) {
 export function Presentation() {
   return (
     <div>
-      <Form
-        onSubmit={(values: Map<string, Value>) => {
-          const username = (values.get("username") as string | undefined) ?? "";
-          const password = (values.get("password") as string | undefined) ?? "";
-          return onSubmit({ username, password });
-        }}
-        style={{
-          flexDirection: "column",
-          display: "flex",
-          margin: 20,
-          maxWidth: "400px",
-        }}
-      >
+      <Form onSubmit={onSubmit} className="formContainer">
         <h1>Registration</h1>
-        <FormStatusError
-          element={<div style={{ color: "red", marginBottom: 20 }} />}
-        />
-        <FormStatusSuccess />
+        <FormError element={<div className="errorText" />} />
+        <FormStatus />
         <CustomField
           label="Username"
           name="username"

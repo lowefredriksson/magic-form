@@ -133,10 +133,8 @@ export function useForm({
         return;
       } else {
         const res = await onSubmit(valueSubject.state.current);
-        console.log("res", res);
         formStatusSubject.state.current.clear();
         formStatusSubject.setState(res.status, res.message);
-        console.log("formStatus state", formStatusSubject.state.current);
         touchedSubject.state.current.clear();
         touchedSubject.observers.current.forEach((value, index, array) => {
           value.update(false);

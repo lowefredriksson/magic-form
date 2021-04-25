@@ -1,0 +1,11 @@
+.formContainer {
+  flex-direction: column;
+  display: flex;
+  width: 400px;
+  margin: 40px;
+  background-color: black;
+}
+
+.body {
+  background-color: red;
+}
